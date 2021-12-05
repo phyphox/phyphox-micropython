@@ -71,9 +71,9 @@ class BLETemperature:
     def __init__(self, ble, name="phyphox"):
         self._ble = ble
         self._ble.active(True)
-        self._ble.irq(self._irq)
-        ((self._handle,),) = self._ble.gatts_register_services((_experimentService,))
-        self._connections = set()
+        #self._ble.irq(self._irq)
+        ((self._handle_data, self.handle_config,),) = self._ble.gatts_register_services((_phyphoxDataService,))
+        #self._connections = set()
         self._payload = advertising_payload(
             name=name, services=[phyphoxBleExperimentServiceUUID], #appearance=_ADV_APPEARANCE_GENERIC_THERMOMETER
         )
@@ -134,6 +134,7 @@ def start():
 
 if __name__ == "__main__":
     demo()
+
 
 
 

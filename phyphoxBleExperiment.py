@@ -91,7 +91,7 @@ class PhyphoxBleExperiment:
           self._UNITX + self._UNITY + self._XPRECISION + self._YPRECISION + self._STYLE + \
           self._COLOR + self._XMLATTRIBUTE + ">\n" + "\t\t\t<input axis=\"x\">" + self._INPUTX + \
           "</input>\n\t\t\t<input axis=\"y\">" + self._INPUTY + "</input>\n\t\t</graph>\n"
-        return buffer                                                                          #FRAGE: Kein Pointer. Return als L枚sung? -> stringIO?
+        return buffer                                                                          #FRAGE: Kein Pointer. Return als L鏋歴ung? -> stringIO?
 
 #Just for debugging
 A = PhyphoxBleExperiment();
