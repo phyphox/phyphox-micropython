@@ -5,10 +5,125 @@ phyphoxBleNElements   = 5
 phyphoxBleNExportSets = 5
 
 class PhyphoxBleExperiment:
-    MESSAGE = ""
+    def __init__(self):
+      self._TITLE          = "MPY-Experiment"
+      self._CATEGORY       = "MPY Experiments"
+      self._DESCRIPTION    = "An experiment created with the phyphox BLE library for mpy-compatible micro controllers"
+      self._CONFIG         = "000000"
+      self._VIEWS          = [0]*phyphoxBleNViews
+    
+    @property
+    def TITLE(self):
+      return self._TITLE
+    
+    def CATEGORY(self):
+      return self._CATEGORY
+    
+    def DESCRIPTION(self):
+      return self._DESCRIPTION
+    
+    def CONFIG(self):
+      return self._CONFIG
+    
+    def VIEWS(self):
+      return self._VIEWS
+    
+    def setTitle(self, strInput):
+        self._TITLE = strInput
+    
+    def getFirstBytes(self, buffer, device_name):
+      #header
+      buffer.write('<phyphox version=\"1.10\">\n')
+      #title
+      buffer.write('<title>')
+      buffer.write(self._TITLE)
+      buffer.write('<\title>\n')
+      #category
+      buffer.write('<category>')
+      buffer.write(self._CATEGORY)
+      buffer.write('<\category>\n')
+      #description
+      buffer.write('<description>')
+      buffer.write(self._DESCRIPTION)
+      buffer.write('<\description>\n')
+      #container
+      buffer.write('data-containers>\n')
+      buffer.write('\t<container size=\"0\" static=\"false\">CH1</container>\n \
+                    \t<container size=\"0\" static=\"false\">CH2</container>\n \
+                    \t<container size=\"0\" static=\"false\">CH3</container>\n \
+                    \t<container size=\"0\" static=\"false\">CH4</container>\n \
+                    \t<container size=\"0\" static=\"false\">CH0</container>\n \
+                    \t<container size=\"0\" static=\"false\">CH1</container>\n')
+      buffer.write('<\data-container>\n')
+      #input
+      buffer.write('<input>\n')
+      buffer.write('\t<bluetooth name=\"')
+      buffer.write(device_name)
+      buffer.write('\" mode=\"notification\" rate=\"1\" subscribeOnStart=\"false\">\n')
+      #config
+      buffer.write('\t\t<config char=\"cddf1003-30f7-4671-8b43-5e40ba53514a\" conversion=\"hexadecimal\">')
+      buffer.write(self._CONFIG)
+      buffer.write('</config>\n\t\t')
+      for i in range(5):
+        buffer.write('<output char=\"cddf1002-30f7-4671-8b43-5e40ba53514a\" conversion=\"float32LittleEndian\" ')
+        k = i*4
+        tmp = "offset=\"%i\" >CH%i" % (k,i+1)
+        buffer.write(tmp)
+        buffer.write('</output>\n\t\t')
+      buffer.write('<output char=\"cddf1002-30f7-4671-8b43-5e40ba53514a\" extra=\"time\">CH0</output>\n')
+      buffer.write('\t</bluetooth>\n')
+      buffer.write('</input>\n')
+      #output
+      buffer.write('<output>\n')
+      buffer.write('\t<bluetooth name=\"')
+      buffer.write(device_name)
+      buffer.write('\">\n')
+      buffer.write('\t\t<input char=\"cddf1003-30f7-4671-8b43-5e40ba53514a\" conversion=\"float32LittleEndian\">CB1</input>\n')
+      buffer.write('\t</bluetooth>\n')
+      buffer.write('</output>\n')
+      #analysis
+      buffer.write('<analysis sleep=\"0\"  onUserInput=\"false\"></analysis>\n')
+      #views
+      buffer.write('<views>\n')
 
-    def getBytes(self,byteString):
-        return byteString
+# 	//build views
+# 	strcat(buffArray, "<views>\n");
+# 
+# 	//errorhandling
+# 	for(int i=0;i<phyphoxBleNViews;i++) {
+# 		for(int j=0;j<phyphoxBleNElements;j++) {
+# 			if(VIEWS[i]!= nullptr && errors<=2){
+# 				if(VIEWS[i]->ELEMENTS[j]!=nullptr){
+# 					if(strcmp(VIEWS[i]->ELEMENTS[j]->ERROR.MESSAGE, "") != 0) {
+# 						if(errors == 0) {
+# 							strcat(buffArray, "\t<view label=\"ERRORS\"> \n");
+# 						}
+# 						VIEWS[i]->ELEMENTS[j]->ERROR.getBytes(buffArray);
+# 						errors++;
+# 					}
+# 				}
+# 			}
+# 		}
+# 	}
+# 	if(errors>0) {
+# 		strcat(buffArray,"\t\t<info  label=\"DE: Siehe Dokumentation für mehr Informationen zu Fehlern.\">\n");
+# 		//strcat(buffArray,"\" color=\"ff0000\">\n");
+# 		strcat(buffArray,"\t\t</info>\n");
+# 		strcat(buffArray,"\t\t<info  label=\"EN: Please check the documentation for more information about errors.\">\n");
+# 		//strcat(buffArray,"\" color=\"ff0000\">\n");
+# 		strcat(buffArray,"\t\t</info>\n");
+# 		strcat(buffArray,"\t</view>\n");
+# 	}
+      
+      
+    def getViewBytes(self, buffer, v, e):
+      print("Not implemented yet")
+        
+    def getLastBytes(self, buffer):
+      print("Not implemented yet")
+        
+    def addView(self, v):
+      print("Not implemented yet")
     
     class View:
       def __init__(self):
@@ -173,7 +288,6 @@ class PhyphoxBleExperiment:
 
 
 
-
 #Just for debugging
 buffer = StringIO()
 A = PhyphoxBleExperiment();
@@ -184,6 +298,7 @@ G.setXMLAttribute("unitY=\"m\"")
 G.setChannel(1,2)
 G.setLabel("test")
 V.addElement(G)
+A.getFirstBytes(buffer,"name")
 for i in range(phyphoxBleNElements):
   V.getBytes(buffer,i)
 print(buffer.getvalue())
