@@ -11,6 +11,7 @@ class PhyphoxBleExperiment:
       self._DESCRIPTION    = "An experiment created with the phyphox BLE library for mpy-compatible micro controllers"
       self._CONFIG         = "000000"
       self._VIEWS          = [0]*phyphoxBleNViews
+      self._EXPORTSETS     = [0]*phyphoxBleNExportSets
     
     @property
     def TITLE(self):
@@ -27,6 +28,9 @@ class PhyphoxBleExperiment:
     
     def VIEWS(self):
       return self._VIEWS
+    
+    def EXPORTSETS(self):
+      return self._EXPORTSETS
     
     def setTitle(self, strInput):
         self._TITLE = strInput
@@ -91,7 +95,7 @@ class PhyphoxBleExperiment:
         for j in range(phyphoxBleNElements):
           if self._VIEWS[i] and errors <= 2:
             if self._VIEWS[i]._ELEMENTS[j]:
-              if not (self._VIEWS[i]._ELEMENTS[j]._ERROR.MESSAGE is ""):
+              if not (self._VIEWS[i]._ELEMENTS[j]._ERROR._MESSAGE is ""):
                 if errors == 0:
                   buffer.write('\t<view label=\"ERRORS\"> \n')
                 self._VIEWS[i]._ELEMENTS[j]._ERROR.getBytes(buffer)
@@ -104,13 +108,34 @@ class PhyphoxBleExperiment:
         buffer.write('\t</view>\n')
       
     def getViewBytes(self, buffer, v, e):
-      print("Not implemented yet")
+      if self._VIEWS[v] and v < phyphoxBleNViews:
+        self._VIEWS[v].getBytes(buffer,e)
         
     def getLastBytes(self, buffer):
-      print("Not implemented yet")
+      noExports = True
+      buffer.write('</views>\n')      
+      #build export
+      buffer.write('<export>\n')
+      for i in range(phyphoxBleNExportSets):
+        if self._EXPORTSETS[i]:
+          self._EXPORTSETS[i].getBytes(buffer)
+          noExports = false
+      if noExports:
+        buffer.write('\t<set name=\"mySet\">\n')
+        buffer.write('\t\t<data name=\"myData1\">CH1</data>\n')
+        buffer.write('\t\t<data name=\"myData2\">CH2</data>\n')
+        buffer.write('\t\t<data name=\"myData3\">CH3</data>\n')
+        buffer.write('\t\t<data name=\"myData4\">CH4</data>\n')
+        buffer.write('\t\t<data name=\"myData5\">CH5</data>\n')
+        buffer.write('\t</set>\n')
+      buffer.write('</export>\n')
+      buffer.write('</phyphox>')
         
     def addView(self, v):
-      print("Not implemented yet")
+      for i in range(phyphoxBleNViews):
+        if not self._VIEWS[i]:
+          self._VIEWS[i] = v
+          break
     
     class View:
       def __init__(self):
@@ -153,7 +178,7 @@ class PhyphoxBleExperiment:
         if elem == phyphoxBleNElements-1:
           buffer.write('\t</view>\n')
     
-    class ERROR:
+    class Error:
       def __init__(self):
         self._MESSAGE       = ""
       
@@ -164,13 +189,18 @@ class PhyphoxBleExperiment:
       def getBytes(self, buffer):
         print("Not implemented yet (ERROR.getBytes()")
     
-    class ERRORHANDLER:
+    class Errorhandler:
       def __init__(self):
         pass
     
       @property
       def err_check_length(self, strInput1, intInput, strInput2):
-        print("Not implemented yet (ERRORHANDLER.err_check_length()")
+        ret: Error
+        if len(input) > intInput:
+          ret._MESSAGE += "ERR_01, in "
+          ret._MESSAGE += strInput2
+          ret._MESSAGE += "(). \n"
+        return ret
         
       def err_check_upper(self, intInput1, intInput2, strInput1):
         print("Not implemented yet (ERRORHANDLER.err_check_upper()")
@@ -182,12 +212,12 @@ class PhyphoxBleExperiment:
         print("Not implemented yet (ERRORHANDLER.err_check_style()")
     
     
-    class Element(ERRORHANDLER):
+    class Element(Errorhandler):
       def __init__(self):
         super().__init__()
         self._TYPEID        = 0
         self._LABEL         = ""
-        self._ERROR         = None
+        self._ERROR         = PhyphoxBleExperiment.Error()
       
       @property
       def TYPEID(self):
@@ -318,9 +348,12 @@ G.setXMLAttribute("unitY=\"m\"")
 G.setChannel(1, 2)
 G.setLabel("test")
 V.addElement(G)
+A.addView(V)
 A.getFirstBytes(buff, "name")
-for el in range(phyphoxBleNElements):
-    V.getBytes(buff, el)
+for vi in range(phyphoxBleNViews):
+  for el in range(phyphoxBleNElements):
+    A.getViewBytes(buff,vi,el)
+A.getLastBytes(buff)
 print(buff.getvalue())
 
 
