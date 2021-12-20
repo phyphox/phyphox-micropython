@@ -32,6 +32,7 @@ class PhyphoxBleExperiment:
         self._TITLE = strInput
     
     def getFirstBytes(self, buffer, device_name):
+      errors = 0
       #header
       buffer.write('<phyphox version=\"1.10\">\n')
       #title
@@ -85,36 +86,22 @@ class PhyphoxBleExperiment:
       buffer.write('<analysis sleep=\"0\"  onUserInput=\"false\"></analysis>\n')
       #views
       buffer.write('<views>\n')
-
-# 	//build views
-# 	strcat(buffArray, "<views>\n");
-# 
-# 	//errorhandling
-# 	for(int i=0;i<phyphoxBleNViews;i++) {
-# 		for(int j=0;j<phyphoxBleNElements;j++) {
-# 			if(VIEWS[i]!= nullptr && errors<=2){
-# 				if(VIEWS[i]->ELEMENTS[j]!=nullptr){
-# 					if(strcmp(VIEWS[i]->ELEMENTS[j]->ERROR.MESSAGE, "") != 0) {
-# 						if(errors == 0) {
-# 							strcat(buffArray, "\t<view label=\"ERRORS\"> \n");
-# 						}
-# 						VIEWS[i]->ELEMENTS[j]->ERROR.getBytes(buffArray);
-# 						errors++;
-# 					}
-# 				}
-# 			}
-# 		}
-# 	}
-# 	if(errors>0) {
-# 		strcat(buffArray,"\t\t<info  label=\"DE: Siehe Dokumentation für mehr Informationen zu Fehlern.\">\n");
-# 		//strcat(buffArray,"\" color=\"ff0000\">\n");
-# 		strcat(buffArray,"\t\t</info>\n");
-# 		strcat(buffArray,"\t\t<info  label=\"EN: Please check the documentation for more information about errors.\">\n");
-# 		//strcat(buffArray,"\" color=\"ff0000\">\n");
-# 		strcat(buffArray,"\t\t</info>\n");
-# 		strcat(buffArray,"\t</view>\n");
-# 	}
-      
+      #errorhandling
+      for i in range(phyphoxBleNViews):
+        for j in range(phyphoxBleNElements):
+          if self._VIEWS[i] and errors <= 2:
+            if self._VIEWS[i]._ELEMENTS[j]:
+              if not (self._VIEWS[i]._ELEMENTS[j]._ERROR.MESSAGE is ""):
+                if errors == 0:
+                  buffer.write('\t<view label=\"ERRORS\"> \n')
+                self._VIEWS[i]._ELEMENTS[j]._ERROR.getBytes(buffer)
+                errors += 1
+      if errors > 0:
+        buffer.write('\t\t<info  label=\"DE: Siehe Dokumentation für mehr Informationen zu Fehlern.\">\n')
+        buffer.write('\t\t</info>\n')
+        buffer.write('\t\t<info  label=\"EN: Please check the documentation for more information about errors.\">\n')
+        buffer.write('\t\t</info>\n')
+        buffer.write('\t</view>\n')
       
     def getViewBytes(self, buffer, v, e):
       print("Not implemented yet")
@@ -166,11 +153,41 @@ class PhyphoxBleExperiment:
         if elem == phyphoxBleNElements-1:
           buffer.write('\t</view>\n')
     
-    
-    class Element:
+    class ERROR:
       def __init__(self):
+        self._MESSAGE       = ""
+      
+      @property
+      def MESSAGE(self):
+        return self._MESSAGE
+    
+      def getBytes(self, buffer):
+        print("Not implemented yet (ERROR.getBytes()")
+    
+    class ERRORHANDLER:
+      def __init__(self):
+        pass
+    
+      @property
+      def err_check_length(self, strInput1, intInput, strInput2):
+        print("Not implemented yet (ERRORHANDLER.err_check_length()")
+        
+      def err_check_upper(self, intInput1, intInput2, strInput1):
+        print("Not implemented yet (ERRORHANDLER.err_check_upper()")
+        
+      def err_check_hex(self, strInput1, strInput2):
+        print("Not implemented yet (ERRORHANDLER.err_check_hex()")
+        
+      def err_check_style(self, strInput1, strInput2):
+        print("Not implemented yet (ERRORHANDLER.err_check_style()")
+    
+    
+    class Element(ERRORHANDLER):
+      def __init__(self):
+        super().__init__()
         self._TYPEID        = 0
         self._LABEL         = ""
+        self._ERROR         = None
       
       @property
       def TYPEID(self):
@@ -178,6 +195,9 @@ class PhyphoxBleExperiment:
         
       def LABEL(self):
         return self._LABEL
+    
+      def ERROR(self):
+        return self._ERROR
     
       def setLabel(self, strInput):
         self._LABEL = " label=\"" + strInput + "\""      
@@ -289,19 +309,21 @@ class PhyphoxBleExperiment:
 
 
 #Just for debugging
-buffer = StringIO()
-A = PhyphoxBleExperiment();
+buff = StringIO()
+A = PhyphoxBleExperiment()
 V = PhyphoxBleExperiment.View()
 G = PhyphoxBleExperiment.Graph()
 G.setLabelX("tmpLabel")
 G.setXMLAttribute("unitY=\"m\"")
-G.setChannel(1,2)
+G.setChannel(1, 2)
 G.setLabel("test")
 V.addElement(G)
-A.getFirstBytes(buffer,"name")
-for i in range(phyphoxBleNElements):
-  V.getBytes(buffer,i)
-print(buffer.getvalue())
+A.getFirstBytes(buff, "name")
+for el in range(phyphoxBleNElements):
+    V.getBytes(buff, el)
+print(buff.getvalue())
+
+
 
 
 
