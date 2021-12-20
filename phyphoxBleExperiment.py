@@ -187,29 +187,52 @@ class PhyphoxBleExperiment:
         return self._MESSAGE
     
       def getBytes(self, buffer):
-        print("Not implemented yet (ERROR.getBytes()")
+        buffer.write('\t\t<info  label=\"ERROR FOUND: ')
+        buffer.write(self._MESSAGE)
+        buffer.write('\" color=\"ff0000\">\n')
+        buffer.write('\t\t</info>\n')
     
     class Errorhandler:
       def __init__(self):
         pass
     
-      @property
       def err_check_length(self, strInput1, intInput, strInput2):
-        ret: Error
-        if len(input) > intInput:
+        ret = PhyphoxBleExperiment.Error()
+        if len(strInput1) > intInput:
           ret._MESSAGE += "ERR_01, in "
           ret._MESSAGE += strInput2
-          ret._MESSAGE += "(). \n"
+          ret._MESSAGE += "()."
         return ret
         
-      def err_check_upper(self, intInput1, intInput2, strInput1):
-        print("Not implemented yet (ERRORHANDLER.err_check_upper()")
+      def err_check_upper(self, intInput1, intInput2, strInput):
+        ret = PhyphoxBleExperiment.Error()
+        if intInput1 > intInput2:
+          ret._MESSAGE += "ERR_02, in "
+          ret._MESSAGE += strInput
+          ret._MESSAGE += "()."
+        return ret
         
       def err_check_hex(self, strInput1, strInput2):
-        print("Not implemented yet (ERRORHANDLER.err_check_hex()")
+        ret = PhyphoxBleExperiment.Error()
+        if len(strInput1) != 6:
+          ret._MESSAGE += "ERR_03, in "
+          ret._MESSAGE += strInput2
+          ret._MESSAGE += "()."
+          return ret
+        for i in strInput1:
+          if i not in '0123456789abcdefABCDEF':
+            ret._MESSAGE += "ERR_03, in "
+            ret._MESSAGE += strInput2
+            ret._MESSAGE += "()."
+        return ret
         
       def err_check_style(self, strInput1, strInput2):
-        print("Not implemented yet (ERRORHANDLER.err_check_style()")
+        ret = PhyphoxBleExperiment.Error()
+        if not((strInput1 is "lines") or (strInput1 is "dots") or (strInput1 is "vbars") or (strInput1 is "hbars") or (strInput1 is "map")):
+          ret._MESSAGE += "ERR_04, in "
+          ret._MESSAGE += strInput2
+          ret._MESSAGE += "()."
+        return ret
     
     
     class Element(Errorhandler):
@@ -230,6 +253,7 @@ class PhyphoxBleExperiment:
         return self._ERROR
     
       def setLabel(self, strInput):
+        self._ERROR = self.err_check_length(strInput,41,'setLabel') if self._ERROR._MESSAGE is "" else self._ERROR
         self._LABEL = " label=\"" + strInput + "\""      
       
     class Graph(Element):
@@ -284,34 +308,45 @@ class PhyphoxBleExperiment:
         
         
       def setUnitX(self, strInput):
+        self._ERROR = self.err_check_length(strInput,5,'setUnitX') if self._ERROR._MESSAGE is "" else self._ERROR
         self._UNITX = " unitX=\"" + strInput + "\""
        
       def setUnitY(self, strInput):
+        self._ERROR = self.err_check_length(strInput,5,'setUnitY') if self._ERROR._MESSAGE is "" else self._ERROR
         self._UNITY = " unitY=\"" + strInput + "\""
         
       def setLabelX(self, strInput):
+        self._ERROR = self.err_check_length(strInput,20,'setLabelX') if self._ERROR._MESSAGE is "" else self._ERROR
         self._LABELX = " labelX=\"" + strInput + "\""
         
       def setLabelY(self, strInput):
+        self._ERROR = self.err_check_length(strInput,20,'setLabelY') if self._ERROR._MESSAGE is "" else self._ERROR
         self._LABELY = " labelY=\"" + strInput + "\""
         
       def setColor(self, strInput):
+        self._ERROR = self.err_check_hex(strInput,'setColor') if self._ERROR._MESSAGE is "" else self._ERROR
         self._COLOR = " color=\"" + strInput + "\""
         
       def setXPrecision(self, intInput):
-        self._XPRECISION = " xPrecision=\"" + intInput + "\""
+        self._ERROR = self.err_check_upper(intInput,9999,'setXPrecision') if self._ERROR._MESSAGE is "" else self._ERROR
+        self._XPRECISION = " xPrecision=\"" + str(intInput) + "\""
         
       def setYPrecision(self, intInput):
-        self._YPRECISION = " yPrecision=\"" + intInput + "\""
+        self._ERROR = self.err_check_upper(intInput,9999,'setYPrecision') if self._ERROR._MESSAGE is "" else self._ERROR
+        self._YPRECISION = " yPrecision=\"" + str(intInput) + "\""
         
       def setChannel(self, intInputX, intInputY):
+        self._ERROR = self.err_check_upper(intInputX,5,'setChannel') if self._ERROR._MESSAGE is "" else self._ERROR
+        self._ERROR = self.err_check_upper(intInputY,5,'setChannel') if self._ERROR._MESSAGE is "" else self._ERROR
         self._INPUTX = "CH" + str(intInputX)
         self._INPUTY = "CH" + str(intInputY)
         
       def setStyle(self, strInput):
+        self._ERROR = self.err_check_style(strInput,'setStyle') if self._ERROR._MESSAGE is "" else self._ERROR
         self._STYLE = " style=\"" + strInput + "\""
         
       def setXMLAttribute(self, strInput):
+        self._ERROR = self.err_check_length(strInput,98,'setXMLAttribute') if self._ERROR._MESSAGE is "" else self._ERROR
         self._XMLATTRIBUTE = " " + strInput
       
       def getBytes(self, buffer):
