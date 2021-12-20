@@ -1,19 +1,18 @@
 import phyphoxBLE
-import bluetooth
 import time
 
 def demo():
-    ble = bluetooth.BLE()
-    # Name max length is 26 characters, name is "phyphox" in app
-    p = phyphoxBLE.PhyphoxBLE(ble, name="abcdefghijklmnopqrstuvwxyz")
+    # Name max length is 26 characters
+    p = phyphoxBLE.PhyphoxBLE(name="phyphox123456789")
     
     i = 0
     while True:
-        p.read()
+        a=p.read_array(3)
+        print(a)
         if p.is_connected():
             # Short burst of queued notifications.
             for _ in range(3):
-                p.write(i,i/7,"Hi")
+                #p.write(i,i/7,2*i)
                 i += 1
         time.sleep_ms(2000)
             
