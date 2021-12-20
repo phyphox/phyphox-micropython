@@ -1,11 +1,264 @@
-class PhyphoxBleExperiment:
-    MESSAGE = ""
+from io import StringIO
 
-    def getBytes(self,byteString):
-      return byteString
+phyphoxBleNViews      = 5
+phyphoxBleNElements   = 5
+phyphoxBleNExportSets = 5
+
+class PhyphoxBleExperiment:
+    def __init__(self):
+      self._TITLE          = "MPY-Experiment"
+      self._CATEGORY       = "MPY Experiments"
+      self._DESCRIPTION    = "An experiment created with the phyphox BLE library for mpy-compatible micro controllers"
+      self._CONFIG         = "000000"
+      self._VIEWS          = [0]*phyphoxBleNViews
+      self._EXPORTSETS     = [0]*phyphoxBleNExportSets
+    
+    @property
+    def TITLE(self):
+      return self._TITLE
+    
+    def CATEGORY(self):
+      return self._CATEGORY
+    
+    def DESCRIPTION(self):
+      return self._DESCRIPTION
+    
+    def CONFIG(self):
+      return self._CONFIG
+    
+    def VIEWS(self):
+      return self._VIEWS
+    
+    def EXPORTSETS(self):
+      return self._EXPORTSETS
+    
+    def setTitle(self, strInput):
+        self._TITLE = strInput
+    
+    def getFirstBytes(self, buffer, device_name):
+      errors = 0
+      #header
+      buffer.write('<phyphox version=\"1.10\">\n')
+      #title
+      buffer.write('<title>')
+      buffer.write(self._TITLE)
+      buffer.write('<\title>\n')
+      #category
+      buffer.write('<category>')
+      buffer.write(self._CATEGORY)
+      buffer.write('<\category>\n')
+      #description
+      buffer.write('<description>')
+      buffer.write(self._DESCRIPTION)
+      buffer.write('<\description>\n')
+      #container
+      buffer.write('data-containers>\n')
+      buffer.write('\t<container size=\"0\" static=\"false\">CH1</container>\n \
+                    \t<container size=\"0\" static=\"false\">CH2</container>\n \
+                    \t<container size=\"0\" static=\"false\">CH3</container>\n \
+                    \t<container size=\"0\" static=\"false\">CH4</container>\n \
+                    \t<container size=\"0\" static=\"false\">CH0</container>\n \
+                    \t<container size=\"0\" static=\"false\">CH1</container>\n')
+      buffer.write('<\data-container>\n')
+      #input
+      buffer.write('<input>\n')
+      buffer.write('\t<bluetooth name=\"')
+      buffer.write(device_name)
+      buffer.write('\" mode=\"notification\" rate=\"1\" subscribeOnStart=\"false\">\n')
+      #config
+      buffer.write('\t\t<config char=\"cddf1003-30f7-4671-8b43-5e40ba53514a\" conversion=\"hexadecimal\">')
+      buffer.write(self._CONFIG)
+      buffer.write('</config>\n\t\t')
+      for i in range(5):
+        buffer.write('<output char=\"cddf1002-30f7-4671-8b43-5e40ba53514a\" conversion=\"float32LittleEndian\" ')
+        k = i*4
+        tmp = "offset=\"%i\" >CH%i" % (k,i+1)
+        buffer.write(tmp)
+        buffer.write('</output>\n\t\t')
+      buffer.write('<output char=\"cddf1002-30f7-4671-8b43-5e40ba53514a\" extra=\"time\">CH0</output>\n')
+      buffer.write('\t</bluetooth>\n')
+      buffer.write('</input>\n')
+      #output
+      buffer.write('<output>\n')
+      buffer.write('\t<bluetooth name=\"')
+      buffer.write(device_name)
+      buffer.write('\">\n')
+      buffer.write('\t\t<input char=\"cddf1003-30f7-4671-8b43-5e40ba53514a\" conversion=\"float32LittleEndian\">CB1</input>\n')
+      buffer.write('\t</bluetooth>\n')
+      buffer.write('</output>\n')
+      #analysis
+      buffer.write('<analysis sleep=\"0\"  onUserInput=\"false\"></analysis>\n')
+      #views
+      buffer.write('<views>\n')
+      #errorhandling
+      for i in range(phyphoxBleNViews):
+        for j in range(phyphoxBleNElements):
+          if self._VIEWS[i] and errors <= 2:
+            if self._VIEWS[i]._ELEMENTS[j]:
+              if not (self._VIEWS[i]._ELEMENTS[j]._ERROR._MESSAGE is ""):
+                if errors == 0:
+                  buffer.write('\t<view label=\"ERRORS\"> \n')
+                self._VIEWS[i]._ELEMENTS[j]._ERROR.getBytes(buffer)
+                errors += 1
+      if errors > 0:
+        buffer.write('\t\t<info  label=\"DE: Siehe Dokumentation für mehr Informationen zu Fehlern.\">\n')
+        buffer.write('\t\t</info>\n')
+        buffer.write('\t\t<info  label=\"EN: Please check the documentation for more information about errors.\">\n')
+        buffer.write('\t\t</info>\n')
+        buffer.write('\t</view>\n')
       
-    class Graph:
+    def getViewBytes(self, buffer, v, e):
+      if self._VIEWS[v] and v < phyphoxBleNViews:
+        self._VIEWS[v].getBytes(buffer,e)
+        
+    def getLastBytes(self, buffer):
+      noExports = True
+      buffer.write('</views>\n')      
+      #build export
+      buffer.write('<export>\n')
+      for i in range(phyphoxBleNExportSets):
+        if self._EXPORTSETS[i]:
+          self._EXPORTSETS[i].getBytes(buffer)
+          noExports = false
+      if noExports:
+        buffer.write('\t<set name=\"mySet\">\n')
+        buffer.write('\t\t<data name=\"myData1\">CH1</data>\n')
+        buffer.write('\t\t<data name=\"myData2\">CH2</data>\n')
+        buffer.write('\t\t<data name=\"myData3\">CH3</data>\n')
+        buffer.write('\t\t<data name=\"myData4\">CH4</data>\n')
+        buffer.write('\t\t<data name=\"myData5\">CH5</data>\n')
+        buffer.write('\t</set>\n')
+      buffer.write('</export>\n')
+      buffer.write('</phyphox>')
+        
+    def addView(self, v):
+      for i in range(phyphoxBleNViews):
+        if not self._VIEWS[i]:
+          self._VIEWS[i] = v
+          break
+    
+    class View:
       def __init__(self):
+        self._LABEL         = ""
+        self._XMLATTRIBUTE  = ""
+        self._ELEMENTS = [0]*phyphoxBleNElements
+        
+      @property
+      def LABEL(self):
+        return self._LABEL
+    
+      def XMLATTRIBUTE(self):
+        return self._XMLATTRIBUTE
+    
+      def ELEMENTS(self):
+        return self._ELEMENTS
+    
+      def addElement(self, e):
+        for i in range(phyphoxBleNElements):
+          if not self._ELEMENTS[i]:
+            self._ELEMENTS[i] = e
+            break
+    
+    
+      def setLabel(self, strInput):
+        self._LABEL = " label=\"" + strInput + "\""
+    
+      def setXMLAttribute(self, strInput):
+        self._XMLATTRIBUTE = " " + strInput
+      
+      def getBytes(self, buffer, elem):
+        if elem == 0:
+          buffer.write('\t<view')
+          buffer.write(self._LABEL)
+          buffer.write(self._XMLATTRIBUTE)
+          buffer.write('>\n')
+        if self._ELEMENTS[elem]:
+            print("")
+            self._ELEMENTS[elem].getBytes(buffer)
+        if elem == phyphoxBleNElements-1:
+          buffer.write('\t</view>\n')
+    
+    class Error:
+      def __init__(self):
+        self._MESSAGE       = ""
+      
+      @property
+      def MESSAGE(self):
+        return self._MESSAGE
+    
+      def getBytes(self, buffer):
+        buffer.write('\t\t<info  label=\"ERROR FOUND: ')
+        buffer.write(self._MESSAGE)
+        buffer.write('\" color=\"ff0000\">\n')
+        buffer.write('\t\t</info>\n')
+    
+    class Errorhandler:
+      def __init__(self):
+        pass
+    
+      def err_check_length(self, strInput1, intInput, strInput2):
+        ret = PhyphoxBleExperiment.Error()
+        if len(strInput1) > intInput:
+          ret._MESSAGE += "ERR_01, in "
+          ret._MESSAGE += strInput2
+          ret._MESSAGE += "()."
+        return ret
+        
+      def err_check_upper(self, intInput1, intInput2, strInput):
+        ret = PhyphoxBleExperiment.Error()
+        if intInput1 > intInput2:
+          ret._MESSAGE += "ERR_02, in "
+          ret._MESSAGE += strInput
+          ret._MESSAGE += "()."
+        return ret
+        
+      def err_check_hex(self, strInput1, strInput2):
+        ret = PhyphoxBleExperiment.Error()
+        if len(strInput1) != 6:
+          ret._MESSAGE += "ERR_03, in "
+          ret._MESSAGE += strInput2
+          ret._MESSAGE += "()."
+          return ret
+        for i in strInput1:
+          if i not in '0123456789abcdefABCDEF':
+            ret._MESSAGE += "ERR_03, in "
+            ret._MESSAGE += strInput2
+            ret._MESSAGE += "()."
+        return ret
+        
+      def err_check_style(self, strInput1, strInput2):
+        ret = PhyphoxBleExperiment.Error()
+        if not((strInput1 is "lines") or (strInput1 is "dots") or (strInput1 is "vbars") or (strInput1 is "hbars") or (strInput1 is "map")):
+          ret._MESSAGE += "ERR_04, in "
+          ret._MESSAGE += strInput2
+          ret._MESSAGE += "()."
+        return ret
+    
+    
+    class Element(Errorhandler):
+      def __init__(self):
+        super().__init__()
+        self._TYPEID        = 0
+        self._LABEL         = ""
+        self._ERROR         = PhyphoxBleExperiment.Error()
+      
+      @property
+      def TYPEID(self):
+        return self._TYPEID
+        
+      def LABEL(self):
+        return self._LABEL
+    
+      def ERROR(self):
+        return self._ERROR
+    
+      def setLabel(self, strInput):
+        self._ERROR = self.err_check_length(strInput,41,'setLabel') if self._ERROR._MESSAGE is "" else self._ERROR
+        self._LABEL = " label=\"" + strInput + "\""      
+      
+    class Graph(Element):
+      def __init__(self):
+        super().__init__()
         self._UNITX         = ""
         self._UNITY         = ""
         self._LABELX        = ""
@@ -26,81 +279,120 @@ class PhyphoxBleExperiment:
         return self._UNITY
         
       def LABELX(self):
-        return self._UNITX
+        return self._LABELX
         
       def LABELY(self):
-        return self._UNITY
+        return self._LABELY
         
       def COLOR(self):
-        return self._UNITY
+        return self._COLOR
         
       def XPRECISION(self):
-        return self._UNITY
+        return self._XPRECISION
         
       def YPRECISION(self):
-        return self._UNITY
+        return self._YPRECISION
         
       def INPUTX(self):
-        return self._UNITY
+        return self._INPUTX
         
       def INPUTY(self):
-        return self._UNITY
+        return self._INPUTY
         
       def STYLE(self):
-        return self._UNITY
+        return self._STYLE
         
       def XMLATTRIBUTE(self):
-        return self._UNITY
+        return self._XMLATTRIBUTE
         
         
         
       def setUnitX(self, strInput):
+        self._ERROR = self.err_check_length(strInput,5,'setUnitX') if self._ERROR._MESSAGE is "" else self._ERROR
         self._UNITX = " unitX=\"" + strInput + "\""
        
       def setUnitY(self, strInput):
+        self._ERROR = self.err_check_length(strInput,5,'setUnitY') if self._ERROR._MESSAGE is "" else self._ERROR
         self._UNITY = " unitY=\"" + strInput + "\""
         
       def setLabelX(self, strInput):
+        self._ERROR = self.err_check_length(strInput,20,'setLabelX') if self._ERROR._MESSAGE is "" else self._ERROR
         self._LABELX = " labelX=\"" + strInput + "\""
         
       def setLabelY(self, strInput):
+        self._ERROR = self.err_check_length(strInput,20,'setLabelY') if self._ERROR._MESSAGE is "" else self._ERROR
         self._LABELY = " labelY=\"" + strInput + "\""
         
       def setColor(self, strInput):
+        self._ERROR = self.err_check_hex(strInput,'setColor') if self._ERROR._MESSAGE is "" else self._ERROR
         self._COLOR = " color=\"" + strInput + "\""
         
       def setXPrecision(self, intInput):
-        self._XPRECISION = " xPrecision=\"" + intInput + "\""
+        self._ERROR = self.err_check_upper(intInput,9999,'setXPrecision') if self._ERROR._MESSAGE is "" else self._ERROR
+        self._XPRECISION = " xPrecision=\"" + str(intInput) + "\""
         
       def setYPrecision(self, intInput):
-        self._YPRECISION = " yPrecision=\"" + intInput + "\""
+        self._ERROR = self.err_check_upper(intInput,9999,'setYPrecision') if self._ERROR._MESSAGE is "" else self._ERROR
+        self._YPRECISION = " yPrecision=\"" + str(intInput) + "\""
         
       def setChannel(self, intInputX, intInputY):
+        self._ERROR = self.err_check_upper(intInputX,5,'setChannel') if self._ERROR._MESSAGE is "" else self._ERROR
+        self._ERROR = self.err_check_upper(intInputY,5,'setChannel') if self._ERROR._MESSAGE is "" else self._ERROR
         self._INPUTX = "CH" + str(intInputX)
         self._INPUTY = "CH" + str(intInputY)
         
       def setStyle(self, strInput):
+        self._ERROR = self.err_check_style(strInput,'setStyle') if self._ERROR._MESSAGE is "" else self._ERROR
         self._STYLE = " style=\"" + strInput + "\""
         
       def setXMLAttribute(self, strInput):
-        self._STYLE = " " + strInput
+        self._ERROR = self.err_check_length(strInput,98,'setXMLAttribute') if self._ERROR._MESSAGE is "" else self._ERROR
+        self._XMLATTRIBUTE = " " + strInput
       
-      #TODO: add Label from parentclass Element
       def getBytes(self, buffer):
-        buffer = "" + buffer + "\t\t<graph" + self._LABELX + self._LABELY + " labelZ=\"\"" + \
-          self._UNITX + self._UNITY + self._XPRECISION + self._YPRECISION + self._STYLE + \
-          self._COLOR + self._XMLATTRIBUTE + ">\n" + "\t\t\t<input axis=\"x\">" + self._INPUTX + \
-          "</input>\n\t\t\t<input axis=\"y\">" + self._INPUTY + "</input>\n\t\t</graph>\n"
-        return buffer                                                                          #FRAGE: Kein Pointer. Return als L枚sung? -> stringIO?
+        buffer.write('\t\t<graph')
+        buffer.write(self._LABEL)
+        buffer.write(self._LABELX)
+        buffer.write(self._LABELY)
+        buffer.write(' labelZ=\"\"')
+        buffer.write(self._UNITX)
+        buffer.write(self._UNITY)
+        buffer.write(self._XPRECISION)
+        buffer.write(self._YPRECISION)
+        buffer.write(self._STYLE)
+        buffer.write(self._COLOR)
+        buffer.write(self._XMLATTRIBUTE)
+        buffer.write('>\n')
+        buffer.write('\t\t\t<input axis=\"x\">')
+        buffer.write(self._INPUTX)
+        buffer.write('"</input>\n\t\t\t<input axis=\"y\">')
+        buffer.write(self._INPUTY)
+        buffer.write('</input>\n\t\t</graph>\n')
+
+
+
+
 
 #Just for debugging
-A = PhyphoxBleExperiment();
+buff = StringIO()
+A = PhyphoxBleExperiment()
+V = PhyphoxBleExperiment.View()
 G = PhyphoxBleExperiment.Graph()
 G.setLabelX("tmpLabel")
 G.setXMLAttribute("unitY=\"m\"")
-G.setChannel(1,2)
-buff = G.getBytes("")
+G.setChannel(1, 2)
+G.setLabel("test")
+V.addElement(G)
+A.addView(V)
+A.getFirstBytes(buff, "name")
+for vi in range(phyphoxBleNViews):
+  for el in range(phyphoxBleNElements):
+    A.getViewBytes(buff,vi,el)
+A.getLastBytes(buff)
+print(buff.getvalue())
 
-print(buff)
+
+
+
 
 
