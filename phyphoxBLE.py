@@ -1,5 +1,7 @@
 import bluetooth
 import struct
+import phyphoxBleExperiment
+from io import StringIO
 from ble_advertising import advertising_payload
 from micropython import const
 
@@ -44,6 +46,12 @@ _phyphoxDataService = (
 
 class PhyphoxBLE:
     def __init__(self, name="phyphox"):
+        self._device_name = "phyphox-mpy"
+        self._p_exp = None
+        self._exp_len = 0
+        self._exp_buffer = StringIO()
+        self.start(self._device_name)
+        print(self._exp_buffer.getvalue())
         print("Init Bluetooth server")
         self._ble = bluetooth.BLE()
         self._ble.active(True)
@@ -142,3 +150,113 @@ class PhyphoxBLE:
 
     def on_write(self, callback):
         self._write_callback = callback
+        
+    def when_subscription_received(self):
+        print("Not implemented yet")
+        
+    def addExperiment(self, exp):
+        #maybe this is a bottleneck, due to stringIO.
+        exp.getFirstBytes(self._exp_buffer, self._device_name)
+        for vi in range(phyphoxBleExperiment.phyphoxBleNViews):
+            for el in range(phyphoxBleExperiment.phyphoxBleNElements):
+                exp.getViewBytes(self._exp_buffer,vi,el)
+        exp.getLastBytes(self._exp_buffer)
+        
+    def start(self):
+        self.start("phyphox-mpy")
+        
+    def start(self, exp_pointer, exp_len):
+        self._p_exp = exp_pointer
+        self._exp_len = exp_len
+        self.start()
+    
+    def start(self, device_name, exp_pointer, exp_len):
+        self._p_exp = exp_pointer
+        self._exp_len = exp_len
+        self.start(device_name)
+        
+    def start(self, device_name):
+        self._device_name = device_name
+        print("starting server")
+        if not self._p_exp:
+            defaultExperiment = phyphoxBleExperiment.PhyphoxBleExperiment()
+            firstView = phyphoxBleExperiment.PhyphoxBleExperiment.View()
+            firstGraph = phyphoxBleExperiment.PhyphoxBleExperiment.Graph()
+            firstGraph.setChannel(0,1)
+            firstView.addElement(firstGraph)
+            defaultExperiment.addView(firstView)
+            self.addExperiment(defaultExperiment)
+        print("NOT IMPLEMENTED YET: start server")
+        
+            
+            
+        """
+        if(printer){
+    printer -> println("starting server");
+  }
+    if(p_exp == nullptr){
+          PhyphoxBleExperiment defaultExperiment;
+
+          //View
+          PhyphoxBleExperiment::View firstView;
+
+          //Graph
+          PhyphoxBleExperiment::Graph firstGraph;      //Create graph which will plot random numbers over time     
+          firstGraph.setChannel(0,1);    
+
+          firstView.addElement(firstGraph);       
+          defaultExperiment.addView(firstView);
+          
+          addExperiment(defaultExperiment);  
+    }
+
+    BLEDevice::init(DEVICE_NAME);
+    myServer = BLEDevice::createServer();
+  myServer->setCallbacks(new MyServerCallbacks());
+    phyphoxExperimentService = myServer->createService(phyphoxBleExperimentServiceUUID);
+
+  experimentCharacteristic = phyphoxExperimentService->createCharacteristic(
+          phyphoxBleExperimentCharacteristicUUID,
+          BLECharacteristic::PROPERTY_READ   |
+           BLECharacteristic::PROPERTY_WRITE |
+           BLECharacteristic::PROPERTY_NOTIFY 
+      );  
+
+  phyphoxDataService = myServer->createService(phyphoxBleDataServiceUUID);
+
+    dataCharacteristic = phyphoxDataService->createCharacteristic(
+         phyphoxBleDataCharacteristicUUID,
+         BLECharacteristic::PROPERTY_READ |
+         BLECharacteristic::PROPERTY_WRITE |
+         BLECharacteristic::PROPERTY_NOTIFY 
+
+       );
+
+    configCharacteristic = phyphoxDataService->createCharacteristic(
+          phyphoxBleConfigCharacteristicUUID,
+          BLECharacteristic::PROPERTY_READ   |
+           BLECharacteristic::PROPERTY_WRITE |
+           BLECharacteristic::PROPERTY_NOTIFY 
+      );
+
+  myExperimentDescriptor = new BLE2902();
+  myDataDescriptor = new BLE2902();
+  myConfigDescriptor = new BLE2902();
+
+
+  myExperimentDescriptor->setCallbacks(new MyExpCallback());
+
+  dataCharacteristic->addDescriptor(myDataDescriptor);
+  experimentCharacteristic->addDescriptor(myExperimentDescriptor);
+  configCharacteristic->addDescriptor(myConfigDescriptor);
+
+  configCharacteristic->setCallbacks(new MyCharCallback());
+
+  phyphoxExperimentService->start();
+  phyphoxDataService->start();
+  myAdvertising = BLEDevice::getAdvertising();
+  myAdvertising->addServiceUUID(phyphoxExperimentService->getUUID());
+  BLEDevice::startAdvertising();
+        """
+
+

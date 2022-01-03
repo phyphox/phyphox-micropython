@@ -389,10 +389,4 @@ for vi in range(phyphoxBleNViews):
   for el in range(phyphoxBleNElements):
     A.getViewBytes(buff,vi,el)
 A.getLastBytes(buff)
-print(buff.getvalue())
-
-
-
-
-
-
+#print(buff.getvalue())
