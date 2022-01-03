@@ -369,8 +369,69 @@ class PhyphoxBleExperiment:
         buffer.write(self._INPUTY)
         buffer.write('</input>\n\t\t</graph>\n')
 
+    class Edit(Element):
+      def __init__(self):
+        super().__init__()
+        self._UNIT          = ""
+        self._SIGNED        = ""
+        self._DECIMAL       = ""
+        self._XMLATTRIBUTE  = ""
+        self._CHANNEL       = "CH5"
 
+       
+      @property
+      def UNIT(self):
+        return self._UNIT
+        
+      def SIGNED(self):
+        return self._SIGNED
+        
+      def DECIMAL(self):
+        return self._DECIMAL
+        
+      def XMLATTRIBUTE(self):
+        return self._XMLATTRIBUTE
+    
+      def CHANNEL(self):
+        return self._CHANNEL
+        
+      def setUnit(self, strInput):
+        self._ERROR = self.err_check_length(strInput,12,'setUnit') if self._ERROR._MESSAGE is "" else self._ERROR
+        self._UNIT = " unit=\"" + strInput + "\""
+        
+      def setSigned(self, boolInput):
+        if boolInput:
+          self._SIGNED = " signed=\"true\""
+        else:
+          self._SIGNED = " signed=\"false\""
+          
+      def setDecimal(self, boolInput):
+        if boolInput:
+          self._DECIMAL = " decimal=\"true\""
+        else:
+          self._DECIMAL = " decimal=\"false\""
+    
+      def setXMLAttribute(self, strInput):
+        self._ERROR = self.err_check_length(strInput,98,'setXMLAttribute') if self._ERROR._MESSAGE is "" else self._ERROR
+        self._XMLATTRIBUTE = " " + strInput
+        
+      def setChannel(self, intInput):
+        self._ERROR = self.err_check_upper(intInput,1,'setChannel') if self._ERROR._MESSAGE is "" else self._ERROR
+        self._CHANNEL = "CH" + str(intInput)
 
+      def getBytes(self, buffer):
+        buffer.write('\t\t<edit')
+        buffer.write(self._LABEL)
+        buffer.write(self._SIGNED)
+        buffer.write(self._DECIMAL)
+        buffer.write(self._UNIT)
+        buffer.write(self._XMLATTRIBUTE)
+        buffer.write('>\n')
+        buffer.write('\t\t\t<output>')
+        buffer.write(self._CHANNEL)
+        buffer.write('</output>\n')
+        buffer.write('\t\t</edit>\n')
+        
 
 
 #Just for debugging
@@ -378,15 +439,17 @@ buff = StringIO()
 A = PhyphoxBleExperiment()
 V = PhyphoxBleExperiment.View()
 G = PhyphoxBleExperiment.Graph()
+E = PhyphoxBleExperiment.Edit()
 G.setLabelX("tmpLabel")
 G.setXMLAttribute("unitY=\"m\"")
 G.setChannel(1, 2)
 G.setLabel("test")
 V.addElement(G)
+V.addElement(E)
 A.addView(V)
 A.getFirstBytes(buff, "name")
 for vi in range(phyphoxBleNViews):
   for el in range(phyphoxBleNElements):
     A.getViewBytes(buff,vi,el)
 A.getLastBytes(buff)
-#print(buff.getvalue())
+print(buff.getvalue())
