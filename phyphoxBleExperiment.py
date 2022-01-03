@@ -432,6 +432,45 @@ class PhyphoxBleExperiment:
         buffer.write('</output>\n')
         buffer.write('\t\t</edit>\n')
         
+    class InfoField(Element):
+      def __init__(self):
+        super().__init__()
+        self._INFO          = ""
+        self._COLOR        = ""
+        self._XMLATTRIBUTE  = ""
+        self._CHANNEL       = "CH5"
+
+       
+      @property
+      def INFO(self):
+        return self._INFO
+        
+      def COLOR(self):
+        return self._COLOR
+        
+      def XMLATTRIBUTE(self):
+        return self._XMLATTRIBUTE
+        
+      def setInfo(self, strInput):
+        self._ERROR = self.err_check_length(strInput,191,'setInfo') if self._ERROR._MESSAGE is "" else self._ERROR
+        self._INFO = " label=\"" + strInput + "\""
+        
+      def setColor(self, strInput):
+        self._ERROR = self.err_check_hex(strInput,'setColor') if self._ERROR._MESSAGE is "" else self._ERROR
+        self._COLOR = " color=\"" + strInput + "\""
+    
+      def setXMLAttribute(self, strInput):
+        self._ERROR = self.err_check_length(strInput,98,'setXMLAttribute') if self._ERROR._MESSAGE is "" else self._ERROR
+        self._XMLATTRIBUTE = " " + strInput
+
+      def getBytes(self, buffer):
+        buffer.write('\t\t<info')
+        buffer.write(self._INFO)
+        buffer.write(self._COLOR)
+        buffer.write(self._XMLATTRIBUTE)
+        buffer.write('>\n')
+        buffer.write('\t\t</info>\n')
+        
 
 
 #Just for debugging
@@ -440,12 +479,15 @@ A = PhyphoxBleExperiment()
 V = PhyphoxBleExperiment.View()
 G = PhyphoxBleExperiment.Graph()
 E = PhyphoxBleExperiment.Edit()
+I = PhyphoxBleExperiment.InfoField()
+I.setInfo("Just a test")
 G.setLabelX("tmpLabel")
 G.setXMLAttribute("unitY=\"m\"")
 G.setChannel(1, 2)
 G.setLabel("test")
 V.addElement(G)
 V.addElement(E)
+V.addElement(I)
 A.addView(V)
 A.getFirstBytes(buff, "name")
 for vi in range(phyphoxBleNViews):
