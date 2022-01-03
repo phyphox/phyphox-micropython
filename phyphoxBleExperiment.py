@@ -42,23 +42,24 @@ class PhyphoxBleExperiment:
       #title
       buffer.write('<title>')
       buffer.write(self._TITLE)
-      buffer.write('<\title>\n')
+      buffer.write('</title>\n')
       #category
       buffer.write('<category>')
       buffer.write(self._CATEGORY)
-      buffer.write('<\category>\n')
+      buffer.write('</category>\n')
       #description
       buffer.write('<description>')
       buffer.write(self._DESCRIPTION)
-      buffer.write('<\description>\n')
+      buffer.write('</description>\n')
       #container
-      buffer.write('data-containers>\n')
-      buffer.write('\t<container size=\"0\" static=\"false\">CH1</container>\n \
-                    \t<container size=\"0\" static=\"false\">CH2</container>\n \
-                    \t<container size=\"0\" static=\"false\">CH3</container>\n \
-                    \t<container size=\"0\" static=\"false\">CH4</container>\n \
-                    \t<container size=\"0\" static=\"false\">CH0</container>\n \
-                    \t<container size=\"0\" static=\"false\">CH1</container>\n')
+      buffer.write('<data-containers>\n')
+      buffer.write('\t<container size=\"0\" static=\"false\">CH1</container>\n')
+      buffer.write('\t<container size=\"0\" static=\"false\">CH2</container>\n')
+      buffer.write('\t<container size=\"0\" static=\"false\">CH3</container>\n')
+      buffer.write('\t<container size=\"0\" static=\"false\">CH4</container>\n')
+      buffer.write('\t<container size=\"0\" static=\"false\">CH5</container>\n')
+      buffer.write('\t<container size=\"0\" static=\"false\">CH0</container>\n')
+      buffer.write('\t<container size=\"0\" static=\"false\">CB1</container>\n')
       buffer.write('<\data-container>\n')
       #input
       buffer.write('<input>\n')
@@ -376,7 +377,7 @@ class PhyphoxBleExperiment:
         self._SIGNED        = ""
         self._DECIMAL       = ""
         self._XMLATTRIBUTE  = ""
-        self._CHANNEL       = "CH5"
+        self._CHANNEL       = "CB1"
 
        
       @property
@@ -417,7 +418,7 @@ class PhyphoxBleExperiment:
         
       def setChannel(self, intInput):
         self._ERROR = self.err_check_upper(intInput,1,'setChannel') if self._ERROR._MESSAGE is "" else self._ERROR
-        self._CHANNEL = "CH" + str(intInput)
+        self._CHANNEL = "CB" + str(intInput)
 
       def getBytes(self, buffer):
         buffer.write('\t\t<edit')
@@ -506,6 +507,64 @@ class PhyphoxBleExperiment:
         buffer.write('>\n')
         buffer.write('\t\t</separator>\n')
         
+    class Value(Element):
+      def __init__(self):
+        super().__init__()
+        self._PRECISION     = ""
+        self._UNIT          = ""
+        self._COLOR         = ""
+        self._XMLATTRIBUTE  = ""
+        self._INPUTVALUE    = "CH3"
+       
+      @property
+      def PRECISION(self):
+        return self._PRECISION
+    
+      def UNIT(self):
+        return self._UNIT
+        
+      def COLOR(self):
+        return self._COLOR
+        
+      def XMLATTRIBUTE(self):
+        return self._XMLATTRIBUTE
+    
+      def INPUTVALUE(self):
+        return self._INPUTVALUE
+        
+      def setPrecision(self, intInput):
+        self._ERROR = self.err_check_upper(intInput,999,'setXPrecision') if self._ERROR._MESSAGE is "" else self._ERROR
+        self._PRECISION = " precision=\"" + str(intInput) + "\""
+        
+      def setUnit(self, strInput):
+        self._ERROR = self.err_check_length(strInput,12,'setUnit') if self._ERROR._MESSAGE is "" else self._ERROR
+        self._UNIT = " unit=\"" + strInput + "\""
+        
+      def setColor(self, strInput):
+        self._ERROR = self.err_check_hex(strInput,'setColor') if self._ERROR._MESSAGE is "" else self._ERROR
+        self._COLOR = " color=\"" + strInput + "\""
+    
+      def setXMLAttribute(self, strInput):
+        self._ERROR = self.err_check_length(strInput,98,'setXMLAttribute') if self._ERROR._MESSAGE is "" else self._ERROR
+        self._XMLATTRIBUTE = " " + strInput
+        
+      def setChannel(self, intInput):
+        self._ERROR = self.err_check_upper(intInput,5,'setChannel') if self._ERROR._MESSAGE is "" else self._ERROR
+        self._INPUTVALUE = "CH" + str(intInput)
+
+      def getBytes(self, buffer):
+        buffer.write('\t\t<value')
+        buffer.write(self._LABEL)
+        buffer.write(self._PRECISION)
+        buffer.write(self._UNIT)
+        buffer.write(' facor=\"1\"')
+        buffer.write(self._COLOR)
+        buffer.write(self._XMLATTRIBUTE)
+        buffer.write('>\n')
+        buffer.write(' \t\t\t<input>')
+        buffer.write(self._INPUTVALUE)
+        buffer.write('</input>\n\t\t</value>\n')
+        
 
 
 #Just for debugging
@@ -515,8 +574,10 @@ V = PhyphoxBleExperiment.View()
 G = PhyphoxBleExperiment.Graph()
 E = PhyphoxBleExperiment.Edit()
 I = PhyphoxBleExperiment.InfoField()
-I.setInfo("Just a test")
 S = PhyphoxBleExperiment.Separator()
+Val = PhyphoxBleExperiment.Value()
+V.setLabel("firstView")
+I.setInfo("Just a test")
 S.setHeight(0.7)
 G.setLabelX("tmpLabel")
 G.setXMLAttribute("unitY=\"m\"")
@@ -526,6 +587,7 @@ V.addElement(G)
 V.addElement(S)
 V.addElement(E)
 V.addElement(I)
+V.addElement(Val)
 A.addView(V)
 A.getFirstBytes(buff, "name")
 for vi in range(phyphoxBleNViews):
