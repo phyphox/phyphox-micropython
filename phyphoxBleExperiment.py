@@ -436,10 +436,8 @@ class PhyphoxBleExperiment:
       def __init__(self):
         super().__init__()
         self._INFO          = ""
-        self._COLOR        = ""
+        self._COLOR         = ""
         self._XMLATTRIBUTE  = ""
-        self._CHANNEL       = "CH5"
-
        
       @property
       def INFO(self):
@@ -471,6 +469,43 @@ class PhyphoxBleExperiment:
         buffer.write('>\n')
         buffer.write('\t\t</info>\n')
         
+    class Separator(Element):
+      def __init__(self):
+        super().__init__()
+        self._HEIGHT        = ""
+        self._COLOR         = ""
+        self._XMLATTRIBUTE  = ""
+       
+      @property
+      def INFO(self):
+        return self._HEIGHT
+        
+      def COLOR(self):
+        return self._COLOR
+        
+      def XMLATTRIBUTE(self):
+        return self._XMLATTRIBUTE
+        
+      def setHeight(self, fltInput):
+        self._ERROR = self.err_check_length(str(fltInput),10,'setHeight') if self._ERROR._MESSAGE is "" else self._ERROR
+        self._HEIGHT = " height=\"" + str(fltInput) + "\""
+        
+      def setColor(self, strInput):
+        self._ERROR = self.err_check_hex(strInput,'setColor') if self._ERROR._MESSAGE is "" else self._ERROR
+        self._COLOR = " color=\"" + strInput + "\""
+    
+      def setXMLAttribute(self, strInput):
+        self._ERROR = self.err_check_length(strInput,98,'setXMLAttribute') if self._ERROR._MESSAGE is "" else self._ERROR
+        self._XMLATTRIBUTE = " " + strInput
+
+      def getBytes(self, buffer):
+        buffer.write('\t\t<separator')
+        buffer.write(self._HEIGHT)
+        buffer.write(self._COLOR)
+        buffer.write(self._XMLATTRIBUTE)
+        buffer.write('>\n')
+        buffer.write('\t\t</separator>\n')
+        
 
 
 #Just for debugging
@@ -481,11 +516,14 @@ G = PhyphoxBleExperiment.Graph()
 E = PhyphoxBleExperiment.Edit()
 I = PhyphoxBleExperiment.InfoField()
 I.setInfo("Just a test")
+S = PhyphoxBleExperiment.Separator()
+S.setHeight(0.7)
 G.setLabelX("tmpLabel")
 G.setXMLAttribute("unitY=\"m\"")
 G.setChannel(1, 2)
 G.setLabel("test")
 V.addElement(G)
+V.addElement(S)
 V.addElement(E)
 V.addElement(I)
 A.addView(V)
