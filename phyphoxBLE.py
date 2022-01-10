@@ -50,7 +50,7 @@ class PhyphoxBLE:
         self._p_exp = None
         self._exp_len = 0
         self._exp_buffer = StringIO()
-        self.start(self._device_name)
+        #self.start(self._device_name)
         print(self._exp_buffer.getvalue())
         print("Init Bluetooth server")
         self._ble = bluetooth.BLE()
@@ -150,12 +150,47 @@ class PhyphoxBLE:
 
     def on_write(self, callback):
         self._write_callback = callback
+
         
     def when_subscription_received(self):
         print("Not implemented yet")
         
+        #TODO: Stop advertiser
+        
+        exp = self._p_exp
+        exp_len = self._exp_len
+        
+        header = [0] * 20
+        phyphox = ['p','h','y','p','h','o','x']
+        table = [0] * 256
+        #TODO: Generate Table + Update (change row below)
+        checksum = 1025
+        arrayLength = self._exp_len
+        
+        experimentSizeArray = [0] * 4
+        experimentSizeArray[0] = (arrayLength >> 24)
+        experimentSizeArray[1] = (arrayLength >> 16)
+        experimentSizeArray[2] = (arrayLength >> 8)
+        experimentSizeArray[3] = arrayLength
+        
+        checksumArray = [0] * 4
+        checksumArray[0] = (checksum >> 24) & 0xFF
+        checksumArray[1] = (checksum >> 16) & 0xFF
+        checksumArray[2] = (checksum >> 8) & 0xFF
+        checksumArray[3] = checksum & 0xFF
+        
+        header[0:7] = phyphox[0:7]
+        header[7:11] = experimentSizeArray[0:4]
+        header[11:15] = checksumArray[:]
+        
+        #TODO: Check below
+        #experimentCharacteristic->setValue(header,sizeof(header));
+        #experimentCharacteristic->notify();
+
+        
     def addExperiment(self, exp):
         #maybe this is a bottleneck, due to stringIO.
+        #TODO: DELETE BUFFER!
         exp.getFirstBytes(self._exp_buffer, self._device_name)
         for vi in range(phyphoxBleExperiment.phyphoxBleNViews):
             for el in range(phyphoxBleExperiment.phyphoxBleNElements):
@@ -187,6 +222,7 @@ class PhyphoxBLE:
             defaultExperiment.addView(firstView)
             self.addExperiment(defaultExperiment)
         print("NOT IMPLEMENTED YET: start server")
+        #TODO Init in start
         
             
             
@@ -258,5 +294,7 @@ class PhyphoxBLE:
   myAdvertising->addServiceUUID(phyphoxExperimentService->getUUID());
   BLEDevice::startAdvertising();
         """
+
+
 
 

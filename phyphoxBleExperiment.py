@@ -60,7 +60,7 @@ class PhyphoxBleExperiment:
       buffer.write('\t<container size=\"0\" static=\"false\">CH5</container>\n')
       buffer.write('\t<container size=\"0\" static=\"false\">CH0</container>\n')
       buffer.write('\t<container size=\"0\" static=\"false\">CB1</container>\n')
-      buffer.write('<\data-container>\n')
+      buffer.write('</data-containers>\n')
       #input
       buffer.write('<input>\n')
       buffer.write('\t<bluetooth name=\"')
