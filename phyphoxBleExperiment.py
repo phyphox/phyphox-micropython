@@ -42,24 +42,25 @@ class PhyphoxBleExperiment:
       #title
       buffer.write('<title>')
       buffer.write(self._TITLE)
-      buffer.write('<\title>\n')
+      buffer.write('</title>\n')
       #category
       buffer.write('<category>')
       buffer.write(self._CATEGORY)
-      buffer.write('<\category>\n')
+      buffer.write('</category>\n')
       #description
       buffer.write('<description>')
       buffer.write(self._DESCRIPTION)
-      buffer.write('<\description>\n')
+      buffer.write('</description>\n')
       #container
-      buffer.write('data-containers>\n')
-      buffer.write('\t<container size=\"0\" static=\"false\">CH1</container>\n \
-                    \t<container size=\"0\" static=\"false\">CH2</container>\n \
-                    \t<container size=\"0\" static=\"false\">CH3</container>\n \
-                    \t<container size=\"0\" static=\"false\">CH4</container>\n \
-                    \t<container size=\"0\" static=\"false\">CH0</container>\n \
-                    \t<container size=\"0\" static=\"false\">CH1</container>\n')
-      buffer.write('<\data-container>\n')
+      buffer.write('<data-containers>\n')
+      buffer.write('\t<container size=\"0\" static=\"false\">CH1</container>\n')
+      buffer.write('\t<container size=\"0\" static=\"false\">CH2</container>\n')
+      buffer.write('\t<container size=\"0\" static=\"false\">CH3</container>\n')
+      buffer.write('\t<container size=\"0\" static=\"false\">CH4</container>\n')
+      buffer.write('\t<container size=\"0\" static=\"false\">CH5</container>\n')
+      buffer.write('\t<container size=\"0\" static=\"false\">CH0</container>\n')
+      buffer.write('\t<container size=\"0\" static=\"false\">CB1</container>\n')
+      buffer.write('</data-containers>\n')
       #input
       buffer.write('<input>\n')
       buffer.write('\t<bluetooth name=\"')
@@ -369,8 +370,201 @@ class PhyphoxBleExperiment:
         buffer.write(self._INPUTY)
         buffer.write('</input>\n\t\t</graph>\n')
 
+    class Edit(Element):
+      def __init__(self):
+        super().__init__()
+        self._UNIT          = ""
+        self._SIGNED        = ""
+        self._DECIMAL       = ""
+        self._XMLATTRIBUTE  = ""
+        self._CHANNEL       = "CB1"
 
+       
+      @property
+      def UNIT(self):
+        return self._UNIT
+        
+      def SIGNED(self):
+        return self._SIGNED
+        
+      def DECIMAL(self):
+        return self._DECIMAL
+        
+      def XMLATTRIBUTE(self):
+        return self._XMLATTRIBUTE
+    
+      def CHANNEL(self):
+        return self._CHANNEL
+        
+      def setUnit(self, strInput):
+        self._ERROR = self.err_check_length(strInput,12,'setUnit') if self._ERROR._MESSAGE is "" else self._ERROR
+        self._UNIT = " unit=\"" + strInput + "\""
+        
+      def setSigned(self, boolInput):
+        if boolInput:
+          self._SIGNED = " signed=\"true\""
+        else:
+          self._SIGNED = " signed=\"false\""
+          
+      def setDecimal(self, boolInput):
+        if boolInput:
+          self._DECIMAL = " decimal=\"true\""
+        else:
+          self._DECIMAL = " decimal=\"false\""
+    
+      def setXMLAttribute(self, strInput):
+        self._ERROR = self.err_check_length(strInput,98,'setXMLAttribute') if self._ERROR._MESSAGE is "" else self._ERROR
+        self._XMLATTRIBUTE = " " + strInput
+        
+      def setChannel(self, intInput):
+        self._ERROR = self.err_check_upper(intInput,1,'setChannel') if self._ERROR._MESSAGE is "" else self._ERROR
+        self._CHANNEL = "CB" + str(intInput)
 
+      def getBytes(self, buffer):
+        buffer.write('\t\t<edit')
+        buffer.write(self._LABEL)
+        buffer.write(self._SIGNED)
+        buffer.write(self._DECIMAL)
+        buffer.write(self._UNIT)
+        buffer.write(self._XMLATTRIBUTE)
+        buffer.write('>\n')
+        buffer.write('\t\t\t<output>')
+        buffer.write(self._CHANNEL)
+        buffer.write('</output>\n')
+        buffer.write('\t\t</edit>\n')
+        
+    class InfoField(Element):
+      def __init__(self):
+        super().__init__()
+        self._INFO          = ""
+        self._COLOR         = ""
+        self._XMLATTRIBUTE  = ""
+       
+      @property
+      def INFO(self):
+        return self._INFO
+        
+      def COLOR(self):
+        return self._COLOR
+        
+      def XMLATTRIBUTE(self):
+        return self._XMLATTRIBUTE
+        
+      def setInfo(self, strInput):
+        self._ERROR = self.err_check_length(strInput,191,'setInfo') if self._ERROR._MESSAGE is "" else self._ERROR
+        self._INFO = " label=\"" + strInput + "\""
+        
+      def setColor(self, strInput):
+        self._ERROR = self.err_check_hex(strInput,'setColor') if self._ERROR._MESSAGE is "" else self._ERROR
+        self._COLOR = " color=\"" + strInput + "\""
+    
+      def setXMLAttribute(self, strInput):
+        self._ERROR = self.err_check_length(strInput,98,'setXMLAttribute') if self._ERROR._MESSAGE is "" else self._ERROR
+        self._XMLATTRIBUTE = " " + strInput
+
+      def getBytes(self, buffer):
+        buffer.write('\t\t<info')
+        buffer.write(self._INFO)
+        buffer.write(self._COLOR)
+        buffer.write(self._XMLATTRIBUTE)
+        buffer.write('>\n')
+        buffer.write('\t\t</info>\n')
+        
+    class Separator(Element):
+      def __init__(self):
+        super().__init__()
+        self._HEIGHT        = ""
+        self._COLOR         = ""
+        self._XMLATTRIBUTE  = ""
+       
+      @property
+      def INFO(self):
+        return self._HEIGHT
+        
+      def COLOR(self):
+        return self._COLOR
+        
+      def XMLATTRIBUTE(self):
+        return self._XMLATTRIBUTE
+        
+      def setHeight(self, fltInput):
+        self._ERROR = self.err_check_length(str(fltInput),10,'setHeight') if self._ERROR._MESSAGE is "" else self._ERROR
+        self._HEIGHT = " height=\"" + str(fltInput) + "\""
+        
+      def setColor(self, strInput):
+        self._ERROR = self.err_check_hex(strInput,'setColor') if self._ERROR._MESSAGE is "" else self._ERROR
+        self._COLOR = " color=\"" + strInput + "\""
+    
+      def setXMLAttribute(self, strInput):
+        self._ERROR = self.err_check_length(strInput,98,'setXMLAttribute') if self._ERROR._MESSAGE is "" else self._ERROR
+        self._XMLATTRIBUTE = " " + strInput
+
+      def getBytes(self, buffer):
+        buffer.write('\t\t<separator')
+        buffer.write(self._HEIGHT)
+        buffer.write(self._COLOR)
+        buffer.write(self._XMLATTRIBUTE)
+        buffer.write('>\n')
+        buffer.write('\t\t</separator>\n')
+        
+    class Value(Element):
+      def __init__(self):
+        super().__init__()
+        self._PRECISION     = ""
+        self._UNIT          = ""
+        self._COLOR         = ""
+        self._XMLATTRIBUTE  = ""
+        self._INPUTVALUE    = "CH3"
+       
+      @property
+      def PRECISION(self):
+        return self._PRECISION
+    
+      def UNIT(self):
+        return self._UNIT
+        
+      def COLOR(self):
+        return self._COLOR
+        
+      def XMLATTRIBUTE(self):
+        return self._XMLATTRIBUTE
+    
+      def INPUTVALUE(self):
+        return self._INPUTVALUE
+        
+      def setPrecision(self, intInput):
+        self._ERROR = self.err_check_upper(intInput,999,'setXPrecision') if self._ERROR._MESSAGE is "" else self._ERROR
+        self._PRECISION = " precision=\"" + str(intInput) + "\""
+        
+      def setUnit(self, strInput):
+        self._ERROR = self.err_check_length(strInput,12,'setUnit') if self._ERROR._MESSAGE is "" else self._ERROR
+        self._UNIT = " unit=\"" + strInput + "\""
+        
+      def setColor(self, strInput):
+        self._ERROR = self.err_check_hex(strInput,'setColor') if self._ERROR._MESSAGE is "" else self._ERROR
+        self._COLOR = " color=\"" + strInput + "\""
+    
+      def setXMLAttribute(self, strInput):
+        self._ERROR = self.err_check_length(strInput,98,'setXMLAttribute') if self._ERROR._MESSAGE is "" else self._ERROR
+        self._XMLATTRIBUTE = " " + strInput
+        
+      def setChannel(self, intInput):
+        self._ERROR = self.err_check_upper(intInput,5,'setChannel') if self._ERROR._MESSAGE is "" else self._ERROR
+        self._INPUTVALUE = "CH" + str(intInput)
+
+      def getBytes(self, buffer):
+        buffer.write('\t\t<value')
+        buffer.write(self._LABEL)
+        buffer.write(self._PRECISION)
+        buffer.write(self._UNIT)
+        buffer.write(' facor=\"1\"')
+        buffer.write(self._COLOR)
+        buffer.write(self._XMLATTRIBUTE)
+        buffer.write('>\n')
+        buffer.write(' \t\t\t<input>')
+        buffer.write(self._INPUTVALUE)
+        buffer.write('</input>\n\t\t</value>\n')
+        
 
 
 #Just for debugging
@@ -378,11 +572,22 @@ buff = StringIO()
 A = PhyphoxBleExperiment()
 V = PhyphoxBleExperiment.View()
 G = PhyphoxBleExperiment.Graph()
+E = PhyphoxBleExperiment.Edit()
+I = PhyphoxBleExperiment.InfoField()
+S = PhyphoxBleExperiment.Separator()
+Val = PhyphoxBleExperiment.Value()
+V.setLabel("firstView")
+I.setInfo("Just a test")
+S.setHeight(0.7)
 G.setLabelX("tmpLabel")
 G.setXMLAttribute("unitY=\"m\"")
 G.setChannel(1, 2)
 G.setLabel("test")
 V.addElement(G)
+V.addElement(S)
+V.addElement(E)
+V.addElement(I)
+V.addElement(Val)
 A.addView(V)
 A.getFirstBytes(buff, "name")
 for vi in range(phyphoxBleNViews):
@@ -390,9 +595,3 @@ for vi in range(phyphoxBleNViews):
     A.getViewBytes(buff,vi,el)
 A.getLastBytes(buff)
 print(buff.getvalue())
-
-
-
-
-
-

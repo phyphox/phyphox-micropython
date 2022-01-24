@@ -1,5 +1,9 @@
 import bluetooth
 import struct
+import phyphoxBleExperiment
+import io
+from io import StringIO
+from io import BytesIO
 from ble_advertising import advertising_payload
 from micropython import const
 
@@ -44,20 +48,15 @@ _phyphoxDataService = (
 
 class PhyphoxBLE:
     def __init__(self, name="phyphox"):
-        print("Init Bluetooth server")
-        self._ble = bluetooth.BLE()
-        self._ble.active(True)
-        self._ble.irq(self._irq)
-        ((self._handle_data, self._handle_config), self._handle_experiment) = self._ble.gatts_register_services((_phyphoxDataService,_phyphoxExperimentService))
-        self._connections = set()
+        self._device_name = "phyphox-mpy"
+        self._p_exp = BytesIO()
+        self._exp_len = 0
+        self._ble = None
+        self._connections = None
         self._write_callback = None
-        if(len(name)<9):
-            self._payload = advertising_payload(name=name, services=[phyphoxBleExperimentServiceUUID])
-        else:
-            self._payload = advertising_payload(name="phyphox", services=[phyphoxBleExperimentServiceUUID])
-        self._resp_data = advertising_payload(name=name)
-        self._advertise()
-
+        self._payload = None
+        self._resp_data = None
+        
     def _irq(self, event, data):
         # Track connections so we can send notifications.
         if event == _IRQ_CENTRAL_CONNECT:
@@ -142,3 +141,115 @@ class PhyphoxBLE:
 
     def on_write(self, callback):
         self._write_callback = callback
+        
+    
+    def crc32_generate_table(self,table):
+        polynomial = 0xEDB88320
+        for i in range(256):
+            c = i
+            for j in range(8):
+                if c&1:
+                    c = polynomial ^ (c >> 1)
+                else:
+                    c = c >> 1
+            table[i] = c
+        
+        
+    def crc32_update(self, table, initial, buf, e_len):
+        c = initial ^ 0xFFFFFFFF
+        i = 0
+        while i <= e_len-1:
+            buf.seek(i)
+            u = buf.readline()
+            i = buf.tell()
+            for ch in range(len(u)):
+                c = table[(c^u[ch]) & 0xFF] ^ (c >> 8)
+        return c ^ 0xFFFFFFFF
+        
+        
+    def when_subscription_received(self):
+        print("subscription received")
+        
+        #TODO: Stop advertiser
+        
+        exp = self._p_exp
+        exp_len = self._exp_len
+        
+        header = [0] * 20
+        phyphox = ['p','h','y','p','h','o','x']
+        table = [0] * 256
+        self.crc32_generate_table(table)
+        checksum = self.crc32_update(table, 0, exp, exp_len)
+        arrayLength = self._exp_len
+        
+        experimentSizeArray = [0] * 4
+        experimentSizeArray[0] = (arrayLength >> 24)
+        experimentSizeArray[1] = (arrayLength >> 16)
+        experimentSizeArray[2] = (arrayLength >> 8)
+        experimentSizeArray[3] = arrayLength
+        
+        checksumArray = [0] * 4
+        checksumArray[0] = (checksum >> 24) & 0xFF
+        checksumArray[1] = (checksum >> 16) & 0xFF
+        checksumArray[2] = (checksum >> 8) & 0xFF
+        checksumArray[3] = checksum & 0xFF
+        
+        header[0:7] = phyphox[0:7]
+        header[7:11] = experimentSizeArray[0:4]
+        header[11:15] = checksumArray[:]
+        
+        #TODO: Check below
+        #experimentCharacteristic->setValue(header,sizeof(header));
+        #experimentCharacteristic->notify();
+
+        
+    def addExperiment(self, exp):
+        buf = StringIO()
+        exp.getFirstBytes(buf, self._device_name)
+        for vi in range(phyphoxBleExperiment.phyphoxBleNViews):
+            for el in range(phyphoxBleExperiment.phyphoxBleNElements):
+                exp.getViewBytes(buf,vi,el)
+        exp.getLastBytes(buf)
+        
+        buf.seek(0)
+        str_data = buf.read().encode('utf8')
+        self._p_exp = io.BytesIO(str_data)    
+        self._p_exp.seek(0)
+        self._p_exp.read()
+        lastPos = self._p_exp.tell()
+        self._exp_len = lastPos
+        buf.close()
+        
+    def start(self, device_name="phyphox", exp_pointer=None, exp_len=None):
+        if exp_pointer:
+            self._p_exp = exp_pointer
+            if not exp_len:
+                print("Please enter length of the experiment")
+            else:
+                self._exp_len = exp_len
+                
+        self._device_name = device_name
+        print("starting server")
+        self._p_exp.seek(0)
+        self._p_exp.read()
+        if self._p_exp.tell() == 0:
+            defaultExperiment = phyphoxBleExperiment.PhyphoxBleExperiment()
+            firstView = phyphoxBleExperiment.PhyphoxBleExperiment.View()
+            firstGraph = phyphoxBleExperiment.PhyphoxBleExperiment.Graph()
+            firstGraph.setChannel(0,1)
+            firstView.addElement(firstGraph)
+            defaultExperiment.addView(firstView)
+            self.addExperiment(defaultExperiment)        
+        self._ble = bluetooth.BLE()
+        self._ble.active(True)
+        self._ble.irq(self._irq)
+        ((self._handle_data, self._handle_config), self._handle_experiment) = self._ble.gatts_register_services((_phyphoxDataService,_phyphoxExperimentService))
+        self._connections = set()
+        self._write_callback = None
+        if(len(self._device_name)<9):
+            self._payload = advertising_payload(name=self._device_name, services=[phyphoxBleExperimentServiceUUID])
+        else:
+            self._payload = advertising_payload(name="phyphox", services=[phyphoxBleExperimentServiceUUID])
+        self._resp_data = advertising_payload(name=self._device_name)
+        self._advertise()
+        
