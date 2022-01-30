@@ -1,0 +1,36 @@
+<phyphox xmlns="http://phyphox.org/xml" xmlns:editor="http://phyphox.org/editor/xml" version="1.7" editor:version="1.0" locale="en">
+    <title>Data Test</title>
+    <category>micropython</category>
+    <description>Testing write() function</description>
+    <data-containers>
+        <container size="1000" static="false">Output 3</container>
+        <container size="1000" static="false">Output 4</container>
+        <container size="1000" static="false">Output 5</container>
+    </data-containers>
+    <input>
+        <bluetooth editor:uuid="170" editor:posx="324" editor:posy="496"    mode="notification" rate="1" subscribeOnStart="false">
+            <output char="cddf1002-30f7-4671-8b43-5e40ba53514a" conversion="formattedString" separator="," index="0">Output 3</output>
+            <output char="cddf1002-30f7-4671-8b43-5e40ba53514a" conversion="formattedString" separator="," index="1">Output 4</output>
+            <output char="cddf1002-30f7-4671-8b43-5e40ba53514a" conversion="formattedString" separator="," index="2">Output 5</output>
+        </bluetooth>
+    </input>
+    <output>
+    </output>
+    <analysis sleep="0"  onUserInput="false">
+    </analysis>
+    <views>
+        <view label="Data View">
+            <value editor:uuid="225" editor:posx="650" editor:posy="500" label="Integer" size="3" precision="2" scientific="false"  factor="1" >
+                <input>Output 3</input>
+            </value>
+            <value editor:uuid="256" editor:posx="643.953125" editor:posy="601.03125" label="Float" size="3" precision="2" scientific="false"  factor="1" >
+                <input>Output 4</input>
+            </value>
+            <value editor:uuid="327" editor:posx="650.21875" editor:posy="728.609375" label="string?" size="3" precision="2" scientific="false"  factor="1" >
+                <input>Output 5</input>
+            </value>
+        </view>
+    </views>
+    <export>
+    </export>
+</phyphox>
