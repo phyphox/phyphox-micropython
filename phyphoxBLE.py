@@ -10,6 +10,7 @@ from micropython import const
 _IRQ_CENTRAL_CONNECT = const(1)
 _IRQ_CENTRAL_DISCONNECT = const(2)
 _IRQ_GATTS_WRITE = const(3)
+_IRQ_GATTC_NOTIFY = const(18)
 
 _FLAG_READ = const(0x0002)
 _FLAG_WRITE_NO_RESPONSE = const(0x0004)
@@ -25,7 +26,7 @@ phyphoxBleConfigCharacteristicUUID = bluetooth.UUID('cddf1003-30f7-4671-8b43-5e4
 
 _experimentCharacteristic = (
     phyphoxBleExperimentCharacteristicUUID,
-    bluetooth.FLAG_READ | bluetooth.FLAG_WRITE,
+    bluetooth.FLAG_READ | bluetooth.FLAG_WRITE | bluetooth.FLAG_NOTIFY,
 )
 
 _phyphoxExperimentService = (
@@ -76,6 +77,10 @@ class PhyphoxBLE:
             value = self._ble.gatts_read(value_handle)
             if value_handle == self._handle_config and self._write_callback:
                 self._write_callback(value)
+        elif event == _IRQ_GATTC_NOTIFY:
+            print("Sending experiment")
+            self.when_subscription_received()
+            
     
     """
     \brief Write multiple float values to data characteristic
@@ -137,6 +142,10 @@ class PhyphoxBLE:
     def _advertise(self, interval_us=500000):
         self._ble.gap_advertise(interval_us, adv_data=self._payload,resp_data=self._resp_data)
         print("Started advertising")
+        
+    def _stop_advertise(self):
+        self._ble.gap_advertise(interval_us=None)
+        print("stopped advertising")
 
 
     def on_write(self, callback):
@@ -169,8 +178,8 @@ class PhyphoxBLE:
         
     def when_subscription_received(self):
         print("subscription received")
-        
-        #TODO: Stop advertiser
+
+        self._stop_advertise()
         
         exp = self._p_exp
         exp_len = self._exp_len
@@ -201,7 +210,10 @@ class PhyphoxBLE:
         #TODO: Check below
         #experimentCharacteristic->setValue(header,sizeof(header));
         #experimentCharacteristic->notify();
-
+        for conn_handle in self._connections:
+            self._ble.gatts_notify(conn_handle, self._handle_experiment, header)
+        
+        self._advertise()
         
     def addExperiment(self, exp):
         buf = StringIO()
@@ -246,10 +258,11 @@ class PhyphoxBLE:
         ((self._handle_data, self._handle_config), self._handle_experiment) = self._ble.gatts_register_services((_phyphoxDataService,_phyphoxExperimentService))
         self._connections = set()
         self._write_callback = None
-        if(len(self._device_name)<9):
-            self._payload = advertising_payload(name=self._device_name, services=[phyphoxBleExperimentServiceUUID])
-        else:
+        
+        if(len(self._device_name)>26):
             self._payload = advertising_payload(name="phyphox", services=[phyphoxBleExperimentServiceUUID])
+        self._payload = advertising_payload(services=[phyphoxBleExperimentServiceUUID])
+
         self._resp_data = advertising_payload(name=self._device_name)
         self._advertise()
         
