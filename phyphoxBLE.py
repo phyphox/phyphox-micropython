@@ -178,7 +178,7 @@ class PhyphoxBLE:
         
     def when_subscription_received(self):
         print("subscription received")
-        
+
         self._stop_advertise()
         
         exp = self._p_exp
@@ -210,7 +210,6 @@ class PhyphoxBLE:
         #TODO: Check below
         #experimentCharacteristic->setValue(header,sizeof(header));
         #experimentCharacteristic->notify();
-        
         for conn_handle in self._connections:
             self._ble.gatts_notify(conn_handle, self._handle_experiment, header)
         
@@ -259,9 +258,11 @@ class PhyphoxBLE:
         ((self._handle_data, self._handle_config), self._handle_experiment) = self._ble.gatts_register_services((_phyphoxDataService,_phyphoxExperimentService))
         self._connections = set()
         self._write_callback = None
+        
         if(len(self._device_name)>26):
             self._payload = advertising_payload(name="phyphox", services=[phyphoxBleExperimentServiceUUID])
         self._payload = advertising_payload(services=[phyphoxBleExperimentServiceUUID])
+
         self._resp_data = advertising_payload(name=self._device_name)
         self._advertise()
         
