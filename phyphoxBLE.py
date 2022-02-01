@@ -23,15 +23,21 @@ phyphoxBleExperimentCharacteristicUUID = bluetooth.UUID('cddf0002-30f7-4671-8b43
 phyphoxBleDataServiceUUID = bluetooth.UUID('cddf1001-30f7-4671-8b43-5e40ba53514a')
 phyphoxBleDataCharacteristicUUID = bluetooth.UUID('cddf1002-30f7-4671-8b43-5e40ba53514a')
 phyphoxBleConfigCharacteristicUUID = bluetooth.UUID('cddf1003-30f7-4671-8b43-5e40ba53514a')
+phyphoxBleExperimentControlCharacteristicUUID = bluetooth.UUID('cddf0003-30f7-4671-8b43-5e40ba53514a')
 
 _experimentCharacteristic = (
     phyphoxBleExperimentCharacteristicUUID,
     bluetooth.FLAG_READ | bluetooth.FLAG_WRITE | bluetooth.FLAG_NOTIFY,
 )
 
+_experimentControlCharacteristic = (
+    phyphoxBleExperimentControlCharacteristicUUID,
+    bluetooth.FLAG_READ | bluetooth.FLAG_WRITE,
+)
+
 _phyphoxExperimentService = (
     phyphoxBleExperimentServiceUUID,
-    (_experimentCharacteristic,),
+    (_experimentCharacteristic,_experimentControlCharacteristic),
 )
 
 _dataCharacteristic = (
@@ -73,14 +79,16 @@ class PhyphoxBLE:
             self._advertise()
         elif event == _IRQ_GATTS_WRITE:
             print("Config write was successful")
+            
             conn_handle, value_handle = data
             value = self._ble.gatts_read(value_handle)
             if value_handle == self._handle_config and self._write_callback:
                 self._write_callback(value)
-        elif event == _IRQ_GATTC_NOTIFY:
-            print("Sending experiment")
-            self.when_subscription_received()
-            
+                
+            control_data = self._ble.gatts_read(self._handle_experiment_control)
+            if control_data == b'\x01':
+                #self.when_subscription_received()
+                print("Sending experiment")
     
     """
     \brief Write multiple float values to data characteristic
@@ -127,14 +135,6 @@ class PhyphoxBLE:
         else:
             print("config is empty")
             return (0,)
-        
-    def add_experiment(self, phyphox_experiment):
-        try:
-            experiment_bytes = phyphox_experiment.get_bytes()
-            for conn_handle in self._connections:
-                self._ble.gatts_notify(conn_handle, self._handle_experiment, phyphox_experiment)
-        except:
-            print("Error in adding experiment")
             
     def is_connected(self):
         return len(self._connections) > 0
@@ -255,7 +255,7 @@ class PhyphoxBLE:
         self._ble = bluetooth.BLE()
         self._ble.active(True)
         self._ble.irq(self._irq)
-        ((self._handle_data, self._handle_config), self._handle_experiment) = self._ble.gatts_register_services((_phyphoxDataService,_phyphoxExperimentService))
+        ((self._handle_data, self._handle_config), (self._handle_experiment, self._handle_experiment_control)) = self._ble.gatts_register_services((_phyphoxDataService,_phyphoxExperimentService))
         self._connections = set()
         self._write_callback = None
         
