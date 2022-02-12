@@ -2,6 +2,7 @@ import bluetooth
 import struct
 import phyphoxBleExperiment
 import io
+import time
 from io import StringIO
 from io import BytesIO
 from ble_advertising import advertising_payload
@@ -180,6 +181,7 @@ class PhyphoxBLE:
         print("subscription received")
 
         self._stop_advertise()
+        print("adverdising stopped")
         
         exp = self._p_exp
         exp_len = self._exp_len
@@ -210,10 +212,34 @@ class PhyphoxBLE:
         #TODO: Check below
         #experimentCharacteristic->setValue(header,sizeof(header));
         #experimentCharacteristic->notify();
+        
+        #header wrong type. Cast to Byte
         for conn_handle in self._connections:
             self._ble.gatts_notify(conn_handle, self._handle_experiment, header)
-        
+            
+        for i in range(int(self._exp_len/20)):
+            exp.seek(i*20)
+            byteSlice = exp.read(20)
+            for j in range(20):
+                header[j] = byteSlice[j]
+            for conn_handle in self._connections:
+                self._ble.gatts_notify(conn_handle, self._handle_experiment, header)
+            print(header)
+            time.sleep_ms(10)
+        if(self._exp_len%20 != 0):
+            rest = self._exp_len%20
+            sliceRest = [0] * rest
+            exp.seek(self._exp_len-rest)
+            byteSlice = exp.read(rest)
+            for j in range(rest):
+                sliceRest[j] = byteSlice[j]
+            for conn_handle in self._connections:
+                self._ble.gatts_notify(conn_handle, self._handle_experiment, sliceRest)
+            print(sliceRest)
+            time.sleep_ms(1)
+            
         self._advertise()
+        print("advertising started")
         
     def addExperiment(self, exp):
         buf = StringIO()
@@ -231,10 +257,12 @@ class PhyphoxBLE:
         lastPos = self._p_exp.tell()
         self._exp_len = lastPos
         buf.close()
+        print("Experiment added")
         
     def start(self, device_name="phyphox", exp_pointer=None, exp_len=None):
         if exp_pointer:
-            self._p_exp = exp_pointer
+            #self._p_exp = exp_pointer
+            self.addExperiment(exp_pointer)
             if not exp_len:
                 print("Please enter length of the experiment")
             else:
@@ -245,13 +273,14 @@ class PhyphoxBLE:
         self._p_exp.seek(0)
         self._p_exp.read()
         if self._p_exp.tell() == 0:
+            print("Create default experiment")
             defaultExperiment = phyphoxBleExperiment.PhyphoxBleExperiment()
             firstView = phyphoxBleExperiment.PhyphoxBleExperiment.View()
             firstGraph = phyphoxBleExperiment.PhyphoxBleExperiment.Graph()
             firstGraph.setChannel(0,1)
             firstView.addElement(firstGraph)
             defaultExperiment.addView(firstView)
-            self.addExperiment(defaultExperiment)        
+            self.addExperiment(defaultExperiment)
         self._ble = bluetooth.BLE()
         self._ble.active(True)
         self._ble.irq(self._irq)
@@ -266,3 +295,4 @@ class PhyphoxBLE:
         self._resp_data = advertising_payload(name=self._device_name)
         self._advertise()
         
+
