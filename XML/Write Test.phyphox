@@ -1,0 +1,36 @@
+<phyphox xmlns="http://phyphox.org/xml" xmlns:editor="http://phyphox.org/editor/xml" version="1.7" editor:version="1.0" locale="en">
+    <title>Write Test</title>
+    <category>Micropython</category>
+    <description>Testing write function</description>
+    <data-containers>
+        <container size="1000" static="false">Output 1</container>
+        <container size="1000" static="false">Output 2</container>
+        <container size="1000" static="false">Output 3</container>
+    </data-containers>
+    <input>
+        <bluetooth editor:uuid="97" editor:posx="499.84375" editor:posy="240.484375"    mode="notification" rate="1" subscribeOnStart="false">
+            <output char="cddf1002-30f7-4671-8b43-5e40ba53514a" conversion="float32LittleEndian" length="4">Output 1</output>
+            <output char="cddf1002-30f7-4671-8b43-5e40ba53514a" conversion="float32LittleEndian" offset="4" length="4">Output 2</output>
+            <output char="cddf1002-30f7-4671-8b43-5e40ba53514a" conversion="float32LittleEndian" offset="8" length="4">Output 3</output>
+        </bluetooth>
+    </input>
+    <output>
+    </output>
+    <analysis sleep="0"  onUserInput="false">
+    </analysis>
+    <views>
+        <view label="New view">
+            <value editor:uuid="104" editor:posx="914.484375" editor:posy="206.671875" label="" size="1" precision="4" scientific="false"  factor="1" >
+                <input>Output 1</input>
+            </value>
+            <value editor:uuid="124" editor:posx="916.96875" editor:posy="310.03125" label="" size="1" precision="4" scientific="false"  factor="1" >
+                <input>Output 2</input>
+            </value>
+            <value editor:uuid="131" editor:posx="919.046875" editor:posy="430.4375" label="" size="1" precision="4" scientific="false"  factor="1" >
+                <input>Output 3</input>
+            </value>
+        </view>
+    </views>
+    <export>
+    </export>
+</phyphox>

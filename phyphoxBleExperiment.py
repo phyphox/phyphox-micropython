@@ -566,7 +566,7 @@ class PhyphoxBleExperiment:
         buffer.write('</input>\n\t\t</value>\n')
         
 
-
+"""
 #Just for debugging
 buff = StringIO()
 A = PhyphoxBleExperiment()
@@ -595,3 +595,4 @@ for vi in range(phyphoxBleNViews):
     A.getViewBytes(buff,vi,el)
 A.getLastBytes(buff)
 print(buff.getvalue())
+"""
