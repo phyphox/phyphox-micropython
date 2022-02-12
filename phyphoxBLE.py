@@ -186,45 +186,42 @@ class PhyphoxBLE:
         exp = self._p_exp
         exp_len = self._exp_len
         
-        header = [0] * 20
-        phyphox = ['p','h','y','p','h','o','x']
+        header = ['0'.encode()] * 20
+        phyphox = ['p'.encode(),'h'.encode(),'y'.encode(),'p'.encode(),'h'.encode(),'o'.encode(),'x'.encode()]
         table = [0] * 256
         self.crc32_generate_table(table)
         checksum = self.crc32_update(table, 0, exp, exp_len)
         arrayLength = self._exp_len
         
         experimentSizeArray = [0] * 4
-        experimentSizeArray[0] = (arrayLength >> 24)
-        experimentSizeArray[1] = (arrayLength >> 16)
-        experimentSizeArray[2] = (arrayLength >> 8)
-        experimentSizeArray[3] = arrayLength
+        experimentSizeArray[0] = str((arrayLength >> 24)).encode()
+        experimentSizeArray[1] = str((arrayLength >> 16)).encode()
+        experimentSizeArray[2] = str((arrayLength >> 8)).encode()
+        experimentSizeArray[3] = str(arrayLength).encode()
         
         checksumArray = [0] * 4
-        checksumArray[0] = (checksum >> 24) & 0xFF
-        checksumArray[1] = (checksum >> 16) & 0xFF
-        checksumArray[2] = (checksum >> 8) & 0xFF
-        checksumArray[3] = checksum & 0xFF
+        checksumArray[0] = str((checksum >> 24) & 0xFF).encode()
+        checksumArray[1] = str((checksum >> 16) & 0xFF).encode()
+        checksumArray[2] = str((checksum >> 8) & 0xFF).encode()
+        checksumArray[3] = str(checksum & 0xFF).encode()
         
         header[0:7] = phyphox[0:7]
         header[7:11] = experimentSizeArray[0:4]
         header[11:15] = checksumArray[:]
         
-        #TODO: Check below
-        #experimentCharacteristic->setValue(header,sizeof(header));
-        #experimentCharacteristic->notify();
-        
-        #header wrong type. Cast to Byte
+        print(str(header))
+
         for conn_handle in self._connections:
-            self._ble.gatts_notify(conn_handle, self._handle_experiment, header)
-            
+            self._ble.gatts_notify(conn_handle, self._handle_experiment, str(header))
+        
         for i in range(int(self._exp_len/20)):
             exp.seek(i*20)
             byteSlice = exp.read(20)
             for j in range(20):
-                header[j] = byteSlice[j]
+                header[j] = str(byteSlice[j]).encode()
             for conn_handle in self._connections:
-                self._ble.gatts_notify(conn_handle, self._handle_experiment, header)
-            print(header)
+                self._ble.gatts_notify(conn_handle, self._handle_experiment, str(header))
+            print(str(header))
             time.sleep_ms(10)
         if(self._exp_len%20 != 0):
             rest = self._exp_len%20
@@ -232,14 +229,14 @@ class PhyphoxBLE:
             exp.seek(self._exp_len-rest)
             byteSlice = exp.read(rest)
             for j in range(rest):
-                sliceRest[j] = byteSlice[j]
+                sliceRest[j] = str(byteSlice[j]).encode()
             for conn_handle in self._connections:
-                self._ble.gatts_notify(conn_handle, self._handle_experiment, sliceRest)
-            print(sliceRest)
+                self._ble.gatts_notify(conn_handle, self._handle_experiment, str(sliceRest))
+            print(str(sliceRest))
             time.sleep_ms(1)
             
         self._advertise()
-        print("advertising started")
+        print("advertising started") 
         
     def addExperiment(self, exp):
         buf = StringIO()
@@ -295,4 +292,6 @@ class PhyphoxBLE:
         self._resp_data = advertising_payload(name=self._device_name)
         self._advertise()
         
+
+
 
