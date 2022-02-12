@@ -205,8 +205,7 @@ class PhyphoxBLE:
         #experimentCharacteristic->setValue(header,sizeof(header));
         #experimentCharacteristic->notify();
         
-        print(header)
-        
+        #header wrong type. Cast to Byte
         for conn_handle in self._connections:
             self._ble.gatts_notify(conn_handle, self._handle_experiment, header)
             

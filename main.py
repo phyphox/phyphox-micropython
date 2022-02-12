@@ -30,13 +30,14 @@ def demo():
     p.start(device_name="a  long name", exp_pointer=A)
     
     #p.start("a long name")
-    p.when_subscription_received()
+    #p.when_subscription_received()
     
     i = 0
     while True:
         #a=p.read_array(3)
         #print(a)
         if p.is_connected():
+            p.when_subscription_received()
             # Short burst of queued notifications.
             """
             for _ in range(3):
