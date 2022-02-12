@@ -4,7 +4,7 @@ import time
 def demo():
     # Name max length is 26 characters
     p = phyphoxBLE.PhyphoxBLE()
-    p.start("a long name")
+    p.start("Write Test")
     
     i = 0
     while True:
@@ -12,11 +12,9 @@ def demo():
         #print(a)
         if p.is_connected():
             # Short burst of queued notifications.
-            """
             for _ in range(3):
-                p.write(i,i/7,2*i)
+                p.write(i,i/7,3.14*i)
                 i += 1
-            """
         time.sleep_ms(2000)
             
 
