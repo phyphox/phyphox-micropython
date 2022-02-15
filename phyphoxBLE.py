@@ -88,7 +88,7 @@ class PhyphoxBLE:
                 
             control_data = self._ble.gatts_read(self._handle_experiment_control)
             if control_data == b'\x01':
-                #self.when_subscription_received()
+                self.when_subscription_received()
                 print("Sending experiment")
     
     """
@@ -186,54 +186,63 @@ class PhyphoxBLE:
         exp = self._p_exp
         exp_len = self._exp_len
         
-        header = ['0'.encode()] * 20
+        header = [0] * 20
         phyphox = ['p'.encode(),'h'.encode(),'y'.encode(),'p'.encode(),'h'.encode(),'o'.encode(),'x'.encode()]
+        #phyphox = ['p','h','y','p','h','o','x']
+        for i in range(7):
+            phyphox[i] = int.from_bytes(phyphox[i], 'big')
         table = [0] * 256
         self.crc32_generate_table(table)
         checksum = self.crc32_update(table, 0, exp, exp_len)
         arrayLength = self._exp_len
         
         experimentSizeArray = [0] * 4
-        experimentSizeArray[0] = str((arrayLength >> 24)).encode()
-        experimentSizeArray[1] = str((arrayLength >> 16)).encode()
-        experimentSizeArray[2] = str((arrayLength >> 8)).encode()
-        experimentSizeArray[3] = str(arrayLength).encode()
+        experimentSizeArray[0] = (arrayLength >> 24)
+        experimentSizeArray[1] = (arrayLength >> 16)
+        experimentSizeArray[2] = (arrayLength >> 8)
+        experimentSizeArray[3] = arrayLength
         
         checksumArray = [0] * 4
-        checksumArray[0] = str((checksum >> 24) & 0xFF).encode()
-        checksumArray[1] = str((checksum >> 16) & 0xFF).encode()
-        checksumArray[2] = str((checksum >> 8) & 0xFF).encode()
-        checksumArray[3] = str(checksum & 0xFF).encode()
+        checksumArray[0] = (checksum >> 24) & 0xFF
+        checksumArray[1] = (checksum >> 16) & 0xFF
+        checksumArray[2] = (checksum >> 8) & 0xFF
+        checksumArray[3] = checksum & 0xFF
         
         header[0:7] = phyphox[0:7]
         header[7:11] = experimentSizeArray[0:4]
         header[11:15] = checksumArray[:]
         
-        print(str(header))
+        print("Header: ",header)
+        print("Bytearray")
+        print(struct.pack(f'{len(header)}f', *header))
 
         for conn_handle in self._connections:
-            self._ble.gatts_notify(conn_handle, self._handle_experiment, str(header))
+            self._ble.gatts_notify(conn_handle, self._handle_experiment, struct.pack(f'{len(header)}f', *header))
+            time.sleep_ms(30)
         
         for i in range(int(self._exp_len/20)):
             exp.seek(i*20)
             byteSlice = exp.read(20)
             for j in range(20):
-                header[j] = str(byteSlice[j]).encode()
+                header[j] = byteSlice[j]
+            time.sleep_ms(30)
             for conn_handle in self._connections:
-                self._ble.gatts_notify(conn_handle, self._handle_experiment, str(header))
-            print(str(header))
-            time.sleep_ms(10)
+                self._ble.gatts_notify(conn_handle, self._handle_experiment, struct.pack(f'{len(header)}f', *header))
+                time.sleep_ms(30)
+            print(struct.pack(f'{len(header)}f', *header))
+            #print(str(header))
         if(self._exp_len%20 != 0):
             rest = self._exp_len%20
             sliceRest = [0] * rest
             exp.seek(self._exp_len-rest)
             byteSlice = exp.read(rest)
             for j in range(rest):
-                sliceRest[j] = str(byteSlice[j]).encode()
+                sliceRest[j] = byteSlice[j]
             for conn_handle in self._connections:
-                self._ble.gatts_notify(conn_handle, self._handle_experiment, str(sliceRest))
-            print(str(sliceRest))
-            time.sleep_ms(1)
+                self._ble.gatts_notify(conn_handle, self._handle_experiment, struct.pack(f'{len(sliceRest)}f', *sliceRest))
+                time.sleep_ms(10)
+            #print(str(sliceRest))
+            print(struct.pack(f'{len(sliceRest)}f', *sliceRest))
             
         self._advertise()
         print("advertising started") 
