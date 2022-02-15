@@ -186,15 +186,19 @@ class PhyphoxBLE:
         exp = self._p_exp
         exp_len = self._exp_len
         
-        header = [0] * 20
-        phyphox = ['p'.encode(),'h'.encode(),'y'.encode(),'p'.encode(),'h'.encode(),'o'.encode(),'x'.encode()]
+        #header = [0] * 20
+        #phyphox = ['p'.encode(),'h'.encode(),'y'.encode(),'p'.encode(),'h'.encode(),'o'.encode(),'x'.encode()]
         #phyphox = ['p','h','y','p','h','o','x']
-        for i in range(7):
-            phyphox[i] = int.from_bytes(phyphox[i], 'big')
+        header = "phyphox".encode()
+        #for i in range(7):
+            #phyphox[i] = int.from_bytes(phyphox[i], 'big')
         table = [0] * 256
         self.crc32_generate_table(table)
         checksum = self.crc32_update(table, 0, exp, exp_len)
         arrayLength = self._exp_len
+        
+        header = header + struct.pack('I',arrayLength) + struct.pack('I',checksum)
+        print("size = ",arrayLength) 
         
         experimentSizeArray = [0] * 4
         experimentSizeArray[0] = (arrayLength >> 24)
@@ -208,18 +212,38 @@ class PhyphoxBLE:
         checksumArray[2] = (checksum >> 8) & 0xFF
         checksumArray[3] = checksum & 0xFF
         
-        header[0:7] = phyphox[0:7]
-        header[7:11] = experimentSizeArray[0:4]
-        header[11:15] = checksumArray[:]
+        #header[0:7] = phyphox[0:7]
+        #header[7:11] = experimentSizeArray[0:4]
+        #header[11:15] = checksumArray[:]
         
         print("Header: ",header)
         print("Bytearray")
         print(struct.pack(f'{len(header)}f', *header))
+        
+        time.sleep_ms(30)
 
         for conn_handle in self._connections:
-            self._ble.gatts_notify(conn_handle, self._handle_experiment, struct.pack(f'{len(header)}f', *header))
+            self._ble.gatts_notify(conn_handhhle, self._handle_experiment, header)
             time.sleep_ms(30)
         
+        for i in range(int(self._exp_len/20)):
+            exp.seek(i*20)
+            byteSlice = exp.read(20)
+            for conn_handle in self._connections:
+                self._ble.gatts_notify(conn_handle, self._handle_experiment, byteSlice)
+                time.sleep_ms(30)
+        if(self._exp_len%20 != 0):
+            rest = self._exp_len%20
+            sliceRest = [0] * rest
+            exp.seek(self._exp_len-rest)
+            byteSlice = exp.read(rest)
+            for conn_handle in self._connections:
+                self._ble.gatts_notify(conn_handle, self._handle_experiment, struct.pack(sliceRest))
+                time.sleep_ms(10)
+            
+        self._advertise()
+        print("advertising started")
+        """
         for i in range(int(self._exp_len/20)):
             exp.seek(i*20)
             byteSlice = exp.read(20)
@@ -246,7 +270,7 @@ class PhyphoxBLE:
             
         self._advertise()
         print("advertising started") 
-        
+        """
     def addExperiment(self, exp):
         buf = StringIO()
         exp.getFirstBytes(buf, self._device_name)
