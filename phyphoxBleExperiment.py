@@ -34,6 +34,15 @@ class PhyphoxBleExperiment:
     
     def setTitle(self, strInput):
         self._TITLE = strInput
+        
+    def setCategory(self, strInput):
+        self._CATEGORY = strInput
+        
+    def setDescription(self, strInput):
+        self._DESCRIPTION = strInput
+        
+    def setConfig(self, strInput):
+        self._CONFIG = strInput
     
     def getFirstBytes(self, buffer, device_name):
       errors = 0
@@ -366,7 +375,7 @@ class PhyphoxBleExperiment:
         buffer.write('>\n')
         buffer.write('\t\t\t<input axis=\"x\">')
         buffer.write(self._INPUTX)
-        buffer.write('"</input>\n\t\t\t<input axis=\"y\">')
+        buffer.write('</input>\n\t\t\t<input axis=\"y\">')
         buffer.write(self._INPUTY)
         buffer.write('</input>\n\t\t</graph>\n')
 
@@ -564,35 +573,3 @@ class PhyphoxBleExperiment:
         buffer.write(' \t\t\t<input>')
         buffer.write(self._INPUTVALUE)
         buffer.write('</input>\n\t\t</value>\n')
-        
-
-"""
-#Just for debugging
-buff = StringIO()
-A = PhyphoxBleExperiment()
-V = PhyphoxBleExperiment.View()
-G = PhyphoxBleExperiment.Graph()
-E = PhyphoxBleExperiment.Edit()
-I = PhyphoxBleExperiment.InfoField()
-S = PhyphoxBleExperiment.Separator()
-Val = PhyphoxBleExperiment.Value()
-V.setLabel("firstView")
-I.setInfo("Just a test")
-S.setHeight(0.7)
-G.setLabelX("tmpLabel")
-G.setXMLAttribute("unitY=\"m\"")
-G.setChannel(1, 2)
-G.setLabel("test")
-V.addElement(G)
-V.addElement(S)
-V.addElement(E)
-V.addElement(I)
-V.addElement(Val)
-A.addView(V)
-A.getFirstBytes(buff, "name")
-for vi in range(phyphoxBleNViews):
-  for el in range(phyphoxBleNElements):
-    A.getViewBytes(buff,vi,el)
-A.getLastBytes(buff)
-print(buff.getvalue())
-"""

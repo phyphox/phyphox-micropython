@@ -191,7 +191,7 @@ class PhyphoxBLE:
         checksum = self.crc32_update(table, 0, exp, exp_len)
         arrayLength = self._exp_len
         
-        header = "phyphox".encode() + struct.pack('<I',arrayLength) + struct.pack('<I',checksum) + b'\x00' + b'\x00' + b'\x00' + b'\x00' + b'\x00'
+        header = "phyphox".encode() + struct.pack('>I',arrayLength) + struct.pack('>I',checksum) + b'\x00' + b'\x00' + b'\x00' + b'\x00' + b'\x00'
         
         print("Header: ",header)
         
@@ -224,7 +224,7 @@ class PhyphoxBLE:
             for el in range(phyphoxBleExperiment.phyphoxBleNElements):
                 exp.getViewBytes(buf,vi,el)
         exp.getLastBytes(buf)
-        
+        print(buf.getvalue())
         buf.seek(0)
         str_data = buf.read().encode('utf8')
         self._p_exp = io.BytesIO(str_data)    
@@ -252,6 +252,7 @@ class PhyphoxBLE:
             print("Create default experiment")
             defaultExperiment = phyphoxBleExperiment.PhyphoxBleExperiment()
             firstView = phyphoxBleExperiment.PhyphoxBleExperiment.View()
+            firstView.setLabel("View")
             firstGraph = phyphoxBleExperiment.PhyphoxBleExperiment.Graph()
             firstGraph.setChannel(0,1)
             firstView.addElement(firstGraph)
@@ -270,7 +271,3 @@ class PhyphoxBLE:
 
         self._resp_data = advertising_payload(name=self._device_name)
         self._advertise()
-        
-
-
-
