@@ -129,7 +129,7 @@ class PhyphoxBleExperiment:
       for i in range(phyphoxBleNExportSets):
         if self._EXPORTSETS[i]:
           self._EXPORTSETS[i].getBytes(buffer)
-          noExports = false
+          noExports = False
       if noExports:
         buffer.write('\t<set name=\"mySet\">\n')
         buffer.write('\t\t<data name=\"myData1\">CH1</data>\n')
@@ -140,12 +140,18 @@ class PhyphoxBleExperiment:
         buffer.write('\t</set>\n')
       buffer.write('</export>\n')
       buffer.write('</phyphox>')
-        
+              
     def addView(self, v):
       for i in range(phyphoxBleNViews):
         if not self._VIEWS[i]:
           self._VIEWS[i] = v
           break
+        
+    def addExportSet(self, e):
+        for i in range(phyphoxBleNExportSets):
+            if not self._EXPORTSETS[i]:
+                self._EXPORTSETS[i] = e
+                break
     
     class View:
       def __init__(self):
@@ -183,7 +189,6 @@ class PhyphoxBleExperiment:
           buffer.write(self._XMLATTRIBUTE)
           buffer.write('>\n')
         if self._ELEMENTS[elem]:
-            print("")
             self._ELEMENTS[elem].getBytes(buffer)
         if elem == phyphoxBleNElements-1:
           buffer.write('\t</view>\n')
@@ -573,3 +578,94 @@ class PhyphoxBleExperiment:
         buffer.write(' \t\t\t<input>')
         buffer.write(self._INPUTVALUE)
         buffer.write('</input>\n\t\t</value>\n')
+        
+    class ExportData(Element):
+        def __init__(self):
+            super().__init__()
+            self._BUFFER        = "CH1"
+            self._XMLATTRIBUTE  = ""
+            self._LABEL = "data"
+        
+        def setLabel(self, strInput):
+            self._ERROR = self.err_check_length(strInput,41,'setLabel') if self._ERROR._MESSAGE is "" else self._ERROR
+            self._LABEL = " name=\"" + strInput + "\""
+        
+        def setDatachannel(self, intInput):
+            self._ERROR = self.err_check_upper(intInput,5,'setChannel') if self._ERROR._MESSAGE is "" else self._ERROR
+            self._BUFFER = "CH" + str(intInput)
+        
+        def setXMLAttribute(self, strInput):
+            self._ERROR = self.err_check_length(strInput,98,'setXMLAttribute') if self._ERROR._MESSAGE is "" else self._ERROR
+            self._XMLATTRIBUTE = " " + strInput
+            
+        def getBytes(self, buffer):
+            buffer.write('\t\t<data')
+            buffer.write(self._LABEL)
+            buffer.write(self._XMLATTRIBUTE)
+            buffer.write('>')
+            buffer.write(self._BUFFER)
+            buffer.write('</data>\n')
+            
+    class ExportSet(Errorhandler):
+        def __init__(self):
+            super().__init__()
+            self._LABEL         = ""
+            self._XMLATTRIBUTE  = ""
+            self._ERROR         = PhyphoxBleExperiment.Error()
+            self._ELEMENTS      = [0]*phyphoxBleNExportSets
+            
+        def setLabel(self, strInput):
+            self._ERROR = self.err_check_length(strInput,41,'setLabel') if self._ERROR._MESSAGE is "" else self._ERROR
+            self._LABEL = " name=\"" + strInput + "\""
+            
+        def addElement(self, e):
+            for i in range(phyphoxBleNExportSets):
+                if not self._ELEMENTS[i]:
+                    self._ELEMENTS[i] = e
+                    break
+                
+        def setXMLAttribute(self, strInput):
+            self._ERROR = self.err_check_length(strInput,98,'setXMLAttribute') if self._ERROR._MESSAGE is "" else self._ERROR
+            self._XMLATTRIBUTE = " " + strInput
+            
+        def getBytes(self, buffer):
+            buffer.write('\t<set')
+            buffer.write(self._LABEL)
+            buffer.write(self._XMLATTRIBUTE)
+            buffer.write('>\n')
+            for i in range(phyphoxBleNExportSets):
+                if self._ELEMENTS[i]:
+                    self._ELEMENTS[i].getBytes(buffer)
+            buffer.write('\t</set>\n')
+
+
+#Just for debugging
+"""
+buff = StringIO()
+A = PhyphoxBleExperiment()
+V = PhyphoxBleExperiment.View()
+G = PhyphoxBleExperiment.Graph()
+E = PhyphoxBleExperiment.Edit()
+I = PhyphoxBleExperiment.InfoField()
+S = PhyphoxBleExperiment.Separator()
+Val = PhyphoxBleExperiment.Value()
+V.setLabel("firstView")
+I.setInfo("Just a test")
+S.setHeight(0.7)
+G.setLabelX("tmpLabel")
+G.setXMLAttribute("unitY=\"m\"")
+G.setChannel(1, 2)
+G.setLabel("test")
+V.addElement(G)
+V.addElement(S)
+V.addElement(E)
+V.addElement(I)
+V.addElement(Val)
+A.addView(V)
+A.getFirstBytes(buff, "name")
+for vi in range(phyphoxBleNViews):
+  for el in range(phyphoxBleNElements):
+    A.getViewBytes(buff,vi,el)
+A.getLastBytes(buff)
+print(buff.getvalue())
+"""

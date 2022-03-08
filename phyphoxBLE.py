@@ -181,7 +181,6 @@ class PhyphoxBLE:
         print("subscription received")
 
         self._stop_advertise()
-        print("adverdising stopped")
         
         exp = self._p_exp
         exp_len = self._exp_len
@@ -190,11 +189,7 @@ class PhyphoxBLE:
         self.crc32_generate_table(table)
         checksum = self.crc32_update(table, 0, exp, exp_len)
         arrayLength = self._exp_len
-        
-        header = "phyphox".encode() + struct.pack('>I',arrayLength) + struct.pack('>I',checksum) + b'\x00' + b'\x00' + b'\x00' + b'\x00' + b'\x00'
-        
-        print("Header: ",header)
-        
+        header = "phyphox".encode() + struct.pack('>I',arrayLength) + struct.pack('>I',checksum) + b'\x00' + b'\x00' + b'\x00' + b'\x00' + b'\x00'    
         time.sleep_ms(30)
 
         for conn_handle in self._connections:
@@ -215,7 +210,6 @@ class PhyphoxBLE:
                 self._ble.gatts_notify(conn_handle, self._handle_experiment, byteSlice)
                 time.sleep_ms(10)
         self._advertise()
-        print("advertising started")
 
     def addExperiment(self, exp):
         buf = StringIO()
@@ -224,7 +218,6 @@ class PhyphoxBLE:
             for el in range(phyphoxBleExperiment.phyphoxBleNElements):
                 exp.getViewBytes(buf,vi,el)
         exp.getLastBytes(buf)
-        print(buf.getvalue())
         buf.seek(0)
         str_data = buf.read().encode('utf8')
         self._p_exp = io.BytesIO(str_data)    
@@ -271,3 +264,7 @@ class PhyphoxBLE:
 
         self._resp_data = advertising_payload(name=self._device_name)
         self._advertise()
+        
+
+
+
