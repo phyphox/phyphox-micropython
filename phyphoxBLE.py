@@ -79,17 +79,17 @@ class PhyphoxBLE:
             # Start advertising again to allow a new connection.
             self._advertise()
         elif event == _IRQ_GATTS_WRITE:
-            print("Config write was successful")
-            
-            conn_handle, value_handle = data
+            #print("Config write was successful")
+            conn_handle, value_handle = data            
             value = self._ble.gatts_read(value_handle)
             if value_handle == self._handle_config and self._write_callback:
-                self._write_callback(value)
-                
-            control_data = self._ble.gatts_read(self._handle_experiment_control)
-            if control_data == b'\x01':
-                #self.when_subscription_received()
-                print("Sending experiment")
+                self._write_callback()
+            elif value_handle == self._handle_experiment_control:        
+                control_data = self._ble.gatts_read(self._handle_experiment_control)
+                print(control_data)
+                if control_data == b'\x01':
+                    self.when_subscription_received()
+                    print("Sending experiment")
     
     """
     \brief Write multiple float values to data characteristic
@@ -102,7 +102,7 @@ class PhyphoxBLE:
         
         for conn_handle in self._connections:
             self._ble.gatts_notify(conn_handle, self._handle_data, send_data)
-            print("Writing to data characteristic:", send_data)
+            #print("Writing to data characteristic:", send_data)
     """
     Reads a float from config characteristic
     returns the float value if succesful
@@ -181,66 +181,37 @@ class PhyphoxBLE:
         print("subscription received")
 
         self._stop_advertise()
-        print("adverdising stopped")
         
         exp = self._p_exp
         exp_len = self._exp_len
-        
-        header = [0] * 20
-        phyphox = ['p','h','y','p','h','o','x']
+
         table = [0] * 256
         self.crc32_generate_table(table)
         checksum = self.crc32_update(table, 0, exp, exp_len)
         arrayLength = self._exp_len
-        
-        experimentSizeArray = [0] * 4
-        experimentSizeArray[0] = (arrayLength >> 24)
-        experimentSizeArray[1] = (arrayLength >> 16)
-        experimentSizeArray[2] = (arrayLength >> 8)
-        experimentSizeArray[3] = arrayLength
-        
-        checksumArray = [0] * 4
-        checksumArray[0] = (checksum >> 24) & 0xFF
-        checksumArray[1] = (checksum >> 16) & 0xFF
-        checksumArray[2] = (checksum >> 8) & 0xFF
-        checksumArray[3] = checksum & 0xFF
-        
-        header[0:7] = phyphox[0:7]
-        header[7:11] = experimentSizeArray[0:4]
-        header[11:15] = checksumArray[:]
-        
-        #TODO: Check below
-        #experimentCharacteristic->setValue(header,sizeof(header));
-        #experimentCharacteristic->notify();
-        
-        #header wrong type. Cast to Byte
+        header = "phyphox".encode() + struct.pack('>I',arrayLength) + struct.pack('>I',checksum) + b'\x00' + b'\x00' + b'\x00' + b'\x00' + b'\x00'    
+        time.sleep_ms(30)
+
         for conn_handle in self._connections:
             self._ble.gatts_notify(conn_handle, self._handle_experiment, header)
-            
+            time.sleep_ms(30)
+        
         for i in range(int(self._exp_len/20)):
             exp.seek(i*20)
             byteSlice = exp.read(20)
-            for j in range(20):
-                header[j] = byteSlice[j]
             for conn_handle in self._connections:
-                self._ble.gatts_notify(conn_handle, self._handle_experiment, header)
-            print(header)
-            time.sleep_ms(10)
+                self._ble.gatts_notify(conn_handle, self._handle_experiment, byteSlice)
+                time.sleep_ms(30)
         if(self._exp_len%20 != 0):
             rest = self._exp_len%20
-            sliceRest = [0] * rest
             exp.seek(self._exp_len-rest)
             byteSlice = exp.read(rest)
-            for j in range(rest):
-                sliceRest[j] = byteSlice[j]
             for conn_handle in self._connections:
-                self._ble.gatts_notify(conn_handle, self._handle_experiment, sliceRest)
-            print(sliceRest)
-            time.sleep_ms(1)
-            
+                self._ble.gatts_notify(conn_handle, self._handle_experiment, byteSlice)
+                time.sleep_ms(10)
+            self._subscribed = True
         self._advertise()
-        print("advertising started")
-        
+
     def addExperiment(self, exp):
         buf = StringIO()
         exp.getFirstBytes(buf, self._device_name)
@@ -248,7 +219,6 @@ class PhyphoxBLE:
             for el in range(phyphoxBleExperiment.phyphoxBleNElements):
                 exp.getViewBytes(buf,vi,el)
         exp.getLastBytes(buf)
-        
         buf.seek(0)
         str_data = buf.read().encode('utf8')
         self._p_exp = io.BytesIO(str_data)    
@@ -260,15 +230,14 @@ class PhyphoxBLE:
         print("Experiment added")
         
     def start(self, device_name="phyphox", exp_pointer=None, exp_len=None):
+        self._device_name = device_name
         if exp_pointer:
             #self._p_exp = exp_pointer
-            self.addExperiment(exp_pointer)
+            #self.addExperiment(exp_pointer)
             if not exp_len:
                 print("Please enter length of the experiment")
             else:
                 self._exp_len = exp_len
-                
-        self._device_name = device_name
         print("starting server")
         self._p_exp.seek(0)
         self._p_exp.read()
@@ -276,6 +245,7 @@ class PhyphoxBLE:
             print("Create default experiment")
             defaultExperiment = phyphoxBleExperiment.PhyphoxBleExperiment()
             firstView = phyphoxBleExperiment.PhyphoxBleExperiment.View()
+            firstView.setLabel("View")
             firstGraph = phyphoxBleExperiment.PhyphoxBleExperiment.Graph()
             firstGraph.setChannel(0,1)
             firstView.addElement(firstGraph)
@@ -295,4 +265,6 @@ class PhyphoxBLE:
         self._resp_data = advertising_payload(name=self._device_name)
         self._advertise()
         
+
+
 
