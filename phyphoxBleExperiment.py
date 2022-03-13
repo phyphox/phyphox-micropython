@@ -6,8 +6,8 @@ phyphoxBleNExportSets = 5
 
 class PhyphoxBleExperiment:
     def __init__(self):
-      self._TITLE          = "MPY-Experiment"
-      self._CATEGORY       = "MPY Experiments"
+      self._TITLE          = "phyphox-Experiment"
+      self._CATEGORY       = "phyphox mpy Experiments"
       self._DESCRIPTION    = "An experiment created with the phyphox BLE library for mpy-compatible micro controllers"
       self._CONFIG         = "000000"
       self._VIEWS          = [0]*phyphoxBleNViews
@@ -74,7 +74,7 @@ class PhyphoxBleExperiment:
       buffer.write('<input>\n')
       buffer.write('\t<bluetooth name=\"')
       buffer.write(device_name)
-      buffer.write('\" mode=\"notification\" rate=\"1\" subscribeOnStart=\"false\">\n')
+      buffer.write('\" id=\"phyphoxBLE\" mode=\"notification\" rate=\"1\" subscribeOnStart=\"false\">\n')
       #config
       buffer.write('\t\t<config char=\"cddf1003-30f7-4671-8b43-5e40ba53514a\" conversion=\"hexadecimal\">')
       buffer.write(self._CONFIG)
@@ -92,7 +92,7 @@ class PhyphoxBleExperiment:
       buffer.write('<output>\n')
       buffer.write('\t<bluetooth name=\"')
       buffer.write(device_name)
-      buffer.write('\">\n')
+      buffer.write('\" id=\"phyphoxBLE\">\n')
       buffer.write('\t\t<input char=\"cddf1003-30f7-4671-8b43-5e40ba53514a\" conversion=\"float32LittleEndian\">CB1</input>\n')
       buffer.write('\t</bluetooth>\n')
       buffer.write('</output>\n')
@@ -140,6 +140,7 @@ class PhyphoxBleExperiment:
         buffer.write('\t</set>\n')
       buffer.write('</export>\n')
       buffer.write('</phyphox>')
+      #print(buffer.getvalue())
               
     def addView(self, v):
       for i in range(phyphoxBleNViews):
@@ -637,35 +638,3 @@ class PhyphoxBleExperiment:
                 if self._ELEMENTS[i]:
                     self._ELEMENTS[i].getBytes(buffer)
             buffer.write('\t</set>\n')
-
-
-#Just for debugging
-"""
-buff = StringIO()
-A = PhyphoxBleExperiment()
-V = PhyphoxBleExperiment.View()
-G = PhyphoxBleExperiment.Graph()
-E = PhyphoxBleExperiment.Edit()
-I = PhyphoxBleExperiment.InfoField()
-S = PhyphoxBleExperiment.Separator()
-Val = PhyphoxBleExperiment.Value()
-V.setLabel("firstView")
-I.setInfo("Just a test")
-S.setHeight(0.7)
-G.setLabelX("tmpLabel")
-G.setXMLAttribute("unitY=\"m\"")
-G.setChannel(1, 2)
-G.setLabel("test")
-V.addElement(G)
-V.addElement(S)
-V.addElement(E)
-V.addElement(I)
-V.addElement(Val)
-A.addView(V)
-A.getFirstBytes(buff, "name")
-for vi in range(phyphoxBleNViews):
-  for el in range(phyphoxBleNElements):
-    A.getViewBytes(buff,vi,el)
-A.getLastBytes(buff)
-print(buff.getvalue())
-"""

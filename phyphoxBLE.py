@@ -79,17 +79,17 @@ class PhyphoxBLE:
             # Start advertising again to allow a new connection.
             self._advertise()
         elif event == _IRQ_GATTS_WRITE:
-            print("Config write was successful")
-            
-            conn_handle, value_handle = data
+            #print("Config write was successful")
+            conn_handle, value_handle = data            
             value = self._ble.gatts_read(value_handle)
             if value_handle == self._handle_config and self._write_callback:
-                self._write_callback(value)
-                
-            control_data = self._ble.gatts_read(self._handle_experiment_control)
-            if control_data == b'\x01':
-                self.when_subscription_received()
-                print("Sending experiment")
+                self._write_callback()
+            elif value_handle == self._handle_experiment_control:        
+                control_data = self._ble.gatts_read(self._handle_experiment_control)
+                print(control_data)
+                if control_data == b'\x01':
+                    self.when_subscription_received()
+                    print("Sending experiment")
     
     """
     \brief Write multiple float values to data characteristic
@@ -102,7 +102,7 @@ class PhyphoxBLE:
         
         for conn_handle in self._connections:
             self._ble.gatts_notify(conn_handle, self._handle_data, send_data)
-            print("Writing to data characteristic:", send_data)
+            #print("Writing to data characteristic:", send_data)
     """
     Reads a float from config characteristic
     returns the float value if succesful
@@ -209,6 +209,7 @@ class PhyphoxBLE:
             for conn_handle in self._connections:
                 self._ble.gatts_notify(conn_handle, self._handle_experiment, byteSlice)
                 time.sleep_ms(10)
+            self._subscribed = True
         self._advertise()
 
     def addExperiment(self, exp):
@@ -229,15 +230,14 @@ class PhyphoxBLE:
         print("Experiment added")
         
     def start(self, device_name="phyphox", exp_pointer=None, exp_len=None):
+        self._device_name = device_name
         if exp_pointer:
             #self._p_exp = exp_pointer
-            self.addExperiment(exp_pointer)
+            #self.addExperiment(exp_pointer)
             if not exp_len:
                 print("Please enter length of the experiment")
             else:
                 self._exp_len = exp_len
-                
-        self._device_name = device_name
         print("starting server")
         self._p_exp.seek(0)
         self._p_exp.read()
