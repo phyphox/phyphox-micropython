@@ -15,9 +15,8 @@ def main():
     #Experiment
     plotRandomValues = phyphoxBleExperiment.PhyphoxBleExperiment()   #generate experiment on Arduino which plot random values
     plotRandomValues.setTitle("Random Number Plotter")
-    plotRandomValues.setCategory("Arduino Experiments")
+    plotRandomValues.setCategory("Micropython Experiments")
     plotRandomValues.setDescription("Random numbers are generated on Arduino and visualized with phyphox afterwards")
-    plotRandomValues.setConfig("F0F0F0")
 
     #View
     firstView = phyphoxBleExperiment.PhyphoxBleExperiment.View()
