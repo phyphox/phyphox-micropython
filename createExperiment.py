@@ -1,9 +1,8 @@
-import phyphoxBLE
-import phyphoxBleExperiment
+import phyphox
 import time
 import random
 
-p = phyphoxBLE.PhyphoxBLE()
+p = phyphox.PhyphoxBLE()
 editValue = 0.0
 firstCall = True
 
@@ -13,19 +12,19 @@ def main():
     p._write_callback = receivedData
     
     #Experiment
-    plotRandomValues = phyphoxBleExperiment.PhyphoxBleExperiment()   #generate experiment on Arduino which plot random values
+    plotRandomValues = phyphox.PhyphoxBleExperiment()   #generate experiment on Arduino which plot random values
     plotRandomValues.setTitle("Random Number Plotter")
     plotRandomValues.setCategory("Micropython Experiments")
     plotRandomValues.setDescription("Random numbers are generated on Arduino and visualized with phyphox afterwards")
 
     #View
-    firstView = phyphoxBleExperiment.PhyphoxBleExperiment.View()
+    firstView = phyphox.PhyphoxBleExperiment.View()
     firstView.setLabel("FirstView") #Create a "view"
-    secondView = phyphoxBleExperiment.PhyphoxBleExperiment.View()
+    secondView = phyphox.PhyphoxBleExperiment.View()
     secondView.setLabel("SecondView") #Create a "view"
 
     #Graph
-    firstGraph = phyphoxBleExperiment.PhyphoxBleExperiment.Graph()   #Create graph which will plot random numbers over time
+    firstGraph = phyphox.PhyphoxBleExperiment.Graph()   #Create graph which will plot random numbers over time
     firstGraph.setLabel("Random number over time")
     firstGraph.setUnitX("s")
     firstGraph.setUnitY("")
@@ -37,7 +36,7 @@ def main():
     firstGraph.setChannel(0, 1)
 
     #Second Graph
-    secondGraph = phyphoxBleExperiment.PhyphoxBleExperiment.Graph()   #Create graph which will plot random numbers over time
+    secondGraph = phyphox.PhyphoxBleExperiment.Graph()   #Create graph which will plot random numbers over time
     secondGraph.setLabel("Random number squared over random number")
     secondGraph.setUnitX("")
     secondGraph.setUnitY("")
@@ -49,18 +48,18 @@ def main():
     secondGraph.setChannel(1, 2)
 
     #Info
-    myInfo = phyphoxBleExperiment.PhyphoxBleExperiment.InfoField()     #Creates an info-box.
+    myInfo = phyphox.PhyphoxBleExperiment.InfoField()     #Creates an info-box.
     myInfo.setInfo("In this view you can set a value between 1 and 10. The squared random value will be multiplied by this value and can be seen here.")
     #myInfo.setColor("404040")                   #Sets font color. Uses a 6 digit hexadecimal value in "quotation marks".
     myInfo.setXMLAttribute("size=\"1.2\"")
 
     #Separator
-    mySeparator = phyphoxBleExperiment.PhyphoxBleExperiment.Separator()      #Creates a line to separate elements.
+    mySeparator = phyphox.PhyphoxBleExperiment.Separator()      #Creates a line to separate elements.
     mySeparator.setHeight(0.3)                       #Sets height of the separator.
     mySeparator.setColor("404040")                   #Sets color of the separator. Uses a 6 digit hexadecimal value in "quotation marks".
 
     #Value
-    myValue = phyphoxBleExperiment.PhyphoxBleExperiment.Value()  #Creates a value-box.
+    myValue = phyphox.PhyphoxBleExperiment.Value()  #Creates a value-box.
     myValue.setLabel("Number")                  #Sets the label
     myValue.setPrecision(2)                     #The amount of digits shown after the decimal point.
     myValue.setUnit("u")                        #The physical unit associated with the displayed value.
@@ -69,7 +68,7 @@ def main():
     myValue.setXMLAttribute("size=\"2\"")
 
     #Edit
-    myEdit = phyphoxBleExperiment.PhyphoxBleExperiment.Edit() 
+    myEdit = phyphox.PhyphoxBleExperiment.Edit() 
     myEdit.setLabel("Editfield")
     myEdit.setUnit("u")
     myEdit.setSigned(False)
@@ -78,14 +77,14 @@ def main():
     myEdit.setXMLAttribute("max=\"10\"")
 
     #Export
-    mySet = phyphoxBleExperiment.PhyphoxBleExperiment.ExportSet()        #Provides exporting the data to excel etc.
+    mySet = phyphox.PhyphoxBleExperiment.ExportSet()        #Provides exporting the data to excel etc.
     mySet.setLabel("mySet")
 
-    myData1 = phyphoxBleExperiment.PhyphoxBleExperiment.ExportData() 
+    myData1 = phyphox.PhyphoxBleExperiment.ExportData() 
     myData1.setLabel("myData1")
     myData1.setDatachannel(1)
 
-    myData2 = phyphoxBleExperiment.PhyphoxBleExperiment.ExportData() 
+    myData2 = phyphox.PhyphoxBleExperiment.ExportData() 
     myData2.setLabel("myData2")
     myData2.setDatachannel(2)
 
@@ -121,3 +120,4 @@ def receivedData():          # get data from PhyPhox app
     
 if __name__ == "__main__":
     main()
+
