@@ -38,14 +38,15 @@ def main():
 
     while True:
         if time.ticks_ms()-lastTimestamp > blinkInterval:
-            print(blinkInterval)
             lastTimestamp = time.ticks_ms();
             led = not led;
             if led:
                 buildInLed.value(1)
+                print("Interval: ", blinkInterval)
                 print("led on")
             else:
-                buildInLed.value(0)          
+                buildInLed.value(0)
+                print("Interval: ", blinkInterval)
                 print("led off")
 
 def receivedData():          # get data from PhyPhox app
@@ -53,9 +54,8 @@ def receivedData():          # get data from PhyPhox app
     receivedInterval = float(p.read())
     if receivedInterval > 0:
         blinkInterval = receivedInterval
-    print(blinkInterval)
-
 
 
 if __name__ == "__main__":
     main()
+
