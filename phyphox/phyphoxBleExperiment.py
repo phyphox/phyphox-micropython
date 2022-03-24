@@ -4,7 +4,7 @@ phyphoxBleNViews      = 5
 phyphoxBleNElements   = 5
 phyphoxBleNExportSets = 5
 
-class PhyphoxBleExperiment:
+class PhyphoxBLEExperiment:
     def __init__(self):
       self._TITLE          = "phyphox-Experiment"
       self._CATEGORY       = "phyphox mpy Experiments"
@@ -213,7 +213,7 @@ class PhyphoxBleExperiment:
         pass
     
       def err_check_length(self, strInput1, intInput, strInput2):
-        ret = PhyphoxBleExperiment.Error()
+        ret = PhyphoxBLEExperiment.Error()
         if len(strInput1) > intInput:
           ret._MESSAGE += "ERR_01, in "
           ret._MESSAGE += strInput2
@@ -221,7 +221,7 @@ class PhyphoxBleExperiment:
         return ret
         
       def err_check_upper(self, intInput1, intInput2, strInput):
-        ret = PhyphoxBleExperiment.Error()
+        ret = PhyphoxBLEExperiment.Error()
         if intInput1 > intInput2:
           ret._MESSAGE += "ERR_02, in "
           ret._MESSAGE += strInput
@@ -229,7 +229,7 @@ class PhyphoxBleExperiment:
         return ret
         
       def err_check_hex(self, strInput1, strInput2):
-        ret = PhyphoxBleExperiment.Error()
+        ret = PhyphoxBLEExperiment.Error()
         if len(strInput1) != 6:
           ret._MESSAGE += "ERR_03, in "
           ret._MESSAGE += strInput2
@@ -243,7 +243,7 @@ class PhyphoxBleExperiment:
         return ret
         
       def err_check_style(self, strInput1, strInput2):
-        ret = PhyphoxBleExperiment.Error()
+        ret = PhyphoxBLEExperiment.Error()
         if not((strInput1 is "lines") or (strInput1 is "dots") or (strInput1 is "vbars") or (strInput1 is "hbars") or (strInput1 is "map")):
           ret._MESSAGE += "ERR_04, in "
           ret._MESSAGE += strInput2
@@ -256,7 +256,7 @@ class PhyphoxBleExperiment:
         super().__init__()
         self._TYPEID        = 0
         self._LABEL         = ""
-        self._ERROR         = PhyphoxBleExperiment.Error()
+        self._ERROR         = PhyphoxBLEExperiment.Error()
       
       @property
       def TYPEID(self):
@@ -612,7 +612,7 @@ class PhyphoxBleExperiment:
             super().__init__()
             self._LABEL         = ""
             self._XMLATTRIBUTE  = ""
-            self._ERROR         = PhyphoxBleExperiment.Error()
+            self._ERROR         = PhyphoxBLEExperiment.Error()
             self._ELEMENTS      = [0]*phyphoxBleNExportSets
             
         def setLabel(self, strInput):
