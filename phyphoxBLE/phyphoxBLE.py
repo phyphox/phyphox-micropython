@@ -1,11 +1,11 @@
 import bluetooth
 import struct
-import phyphox.phyphoxBleExperiment
+import phyphoxBLE.phyphoxBleExperiment
 import io
 import time
 from io import StringIO
 from io import BytesIO
-from phyphox.ble_advertising import advertising_payload
+from phyphoxBLE.ble_advertising import advertising_payload
 from micropython import const
 
 _IRQ_CENTRAL_CONNECT = const(1)
@@ -215,8 +215,8 @@ class PhyphoxBLE:
     def addExperiment(self, exp):
         buf = StringIO()
         exp.getFirstBytes(buf, self._device_name)
-        for vi in range(phyphox.phyphoxBleNViews):
-            for el in range(phyphox.phyphoxBleNElements):
+        for vi in range(phyphoxBLE.phyphoxBleNViews):
+            for el in range(phyphoxBLE.phyphoxBleNElements):
                 exp.getViewBytes(buf,vi,el)
         exp.getLastBytes(buf)
         buf.seek(0)
@@ -243,10 +243,10 @@ class PhyphoxBLE:
         self._p_exp.read()
         if self._p_exp.tell() == 0:
             print("Create default experiment")
-            defaultExperiment = phyphox.PhyphoxBleExperiment()
-            firstView = phyphox.PhyphoxBleExperiment.View()
+            defaultExperiment = phyphoxBLE.PhyphoxBleExperiment()
+            firstView = phyphoxBLE.PhyphoxBleExperiment.View()
             firstView.setLabel("View")
-            firstGraph = phyphox.PhyphoxBleExperiment.Graph()
+            firstGraph = phyphoxBLE.PhyphoxBleExperiment.Graph()
             firstGraph.setChannel(0,1)
             firstView.addElement(firstGraph)
             defaultExperiment.addView(firstView)
@@ -265,7 +265,3 @@ class PhyphoxBLE:
         self._resp_data = advertising_payload(name=self._device_name)
         self._advertise()
         
-
-
-
-
