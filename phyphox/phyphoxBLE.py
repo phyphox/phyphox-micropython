@@ -1,6 +1,6 @@
 import bluetooth
 import struct
-import phyphox.PhyphoxBLEExperiment
+import phyphox.phyphoxBLEExperiment
 import io
 import time
 from io import StringIO
@@ -64,7 +64,7 @@ class PhyphoxBLE:
         self._write_callback = None
         self._payload = None
         self._resp_data = None
-        self._debug = False
+        self.debug = False
         
     def _irq(self, event, data):
         # Track connections so we can send notifications.
@@ -266,6 +266,7 @@ class PhyphoxBLE:
         self._resp_data = advertising_payload(name=self._device_name)
         self._advertise()
         
+
 
 
 

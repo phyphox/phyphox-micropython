@@ -7,7 +7,7 @@ lastTimestamp = 0
 blinkInterval = 1000
 led = True
 ledPin = 22
-p.debug = True
+p.debug = False
 
 def main():
     global lastTimestamp
@@ -54,4 +54,5 @@ def receivedData():          # get data from PhyPhox app
 
 if __name__ == "__main__":
     main()
+
 
