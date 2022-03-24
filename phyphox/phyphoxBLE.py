@@ -1,6 +1,6 @@
 import bluetooth
 import struct
-import phyphox.phyphoxBleExperiment
+import phyphox.phyphoxBLEExperiment
 import io
 import time
 from io import StringIO
@@ -18,39 +18,39 @@ _FLAG_WRITE_NO_RESPONSE = const(0x0004)
 _FLAG_WRITE = const(0x0008)
 _FLAG_NOTIFY = const(0x0010)
 
-phyphoxBleExperimentServiceUUID = bluetooth.UUID('cddf0001-30f7-4671-8b43-5e40ba53514a')
-phyphoxBleExperimentCharacteristicUUID = bluetooth.UUID('cddf0002-30f7-4671-8b43-5e40ba53514a')
+phyphoxBLEExperimentServiceUUID = bluetooth.UUID('cddf0001-30f7-4671-8b43-5e40ba53514a')
+phyphoxBLEExperimentCharacteristicUUID = bluetooth.UUID('cddf0002-30f7-4671-8b43-5e40ba53514a')
 
-phyphoxBleDataServiceUUID = bluetooth.UUID('cddf1001-30f7-4671-8b43-5e40ba53514a')
-phyphoxBleDataCharacteristicUUID = bluetooth.UUID('cddf1002-30f7-4671-8b43-5e40ba53514a')
-phyphoxBleConfigCharacteristicUUID = bluetooth.UUID('cddf1003-30f7-4671-8b43-5e40ba53514a')
-phyphoxBleExperimentControlCharacteristicUUID = bluetooth.UUID('cddf0003-30f7-4671-8b43-5e40ba53514a')
+phyphoxBLEDataServiceUUID = bluetooth.UUID('cddf1001-30f7-4671-8b43-5e40ba53514a')
+phyphoxBLEDataCharacteristicUUID = bluetooth.UUID('cddf1002-30f7-4671-8b43-5e40ba53514a')
+phyphoxBLEConfigCharacteristicUUID = bluetooth.UUID('cddf1003-30f7-4671-8b43-5e40ba53514a')
+phyphoxBLEExperimentControlCharacteristicUUID = bluetooth.UUID('cddf0003-30f7-4671-8b43-5e40ba53514a')
 
 _experimentCharacteristic = (
-    phyphoxBleExperimentCharacteristicUUID,
+    phyphoxBLEExperimentCharacteristicUUID,
     bluetooth.FLAG_READ | bluetooth.FLAG_WRITE | bluetooth.FLAG_NOTIFY,
 )
 
 _experimentControlCharacteristic = (
-    phyphoxBleExperimentControlCharacteristicUUID,
+    phyphoxBLEExperimentControlCharacteristicUUID,
     bluetooth.FLAG_READ | bluetooth.FLAG_WRITE,
 )
 
 _phyphoxExperimentService = (
-    phyphoxBleExperimentServiceUUID,
+    phyphoxBLEExperimentServiceUUID,
     (_experimentCharacteristic,_experimentControlCharacteristic),
 )
 
 _dataCharacteristic = (
-    phyphoxBleDataCharacteristicUUID,
+    phyphoxBLEDataCharacteristicUUID,
     bluetooth.FLAG_READ | bluetooth.FLAG_NOTIFY,
 )
 _configCharacteristic = (
-    phyphoxBleConfigCharacteristicUUID,
+    phyphoxBLEConfigCharacteristicUUID,
     bluetooth.FLAG_READ | bluetooth.FLAG_WRITE,
 )
 _phyphoxDataService = (
-    phyphoxBleDataServiceUUID,
+    phyphoxBLEDataServiceUUID,
     (_dataCharacteristic,_configCharacteristic,),
 )
 
@@ -64,32 +64,33 @@ class PhyphoxBLE:
         self._write_callback = None
         self._payload = None
         self._resp_data = None
+        self.debug = False
         
     def _irq(self, event, data):
         # Track connections so we can send notifications.
         if event == _IRQ_CENTRAL_CONNECT:
             conn_handle, _, _ = data
-            print("New connection", conn_handle)
+            if self.debug: print("New connection", conn_handle)
             self._connections.add(conn_handle)
-            print("Connections:",self._connections)
+            if self.debug: print("Connections:",self._connections)
         elif event == _IRQ_CENTRAL_DISCONNECT:
             conn_handle, _, _ = data
-            print("Disconnected", conn_handle)
+            if self.debug: print("Disconnected", conn_handle)
             self._connections.remove(conn_handle)
             # Start advertising again to allow a new connection.
             self._advertise()
         elif event == _IRQ_GATTS_WRITE:
-            #print("Config write was successful")
+            if self.debug: print("Config write was successful")
             conn_handle, value_handle = data            
             value = self._ble.gatts_read(value_handle)
             if value_handle == self._handle_config and self._write_callback:
                 self._write_callback()
             elif value_handle == self._handle_experiment_control:        
                 control_data = self._ble.gatts_read(self._handle_experiment_control)
-                print(control_data)
+                if self.debug: print(control_data)
                 if control_data == b'\x01':
                     self.when_subscription_received()
-                    print("Sending experiment")
+                    if self.debug: print("Sending experiment")
     
     """
     \brief Write multiple float values to data characteristic
@@ -102,23 +103,24 @@ class PhyphoxBLE:
         
         for conn_handle in self._connections:
             self._ble.gatts_notify(conn_handle, self._handle_data, send_data)
-            #print("Writing to data characteristic:", send_data)
+            if self.debug: print("Writing to data characteristic:", send_data)
     """
     Reads a float from config characteristic
     returns the float value if succesful
     """
     def read(self):
         packed_data = self._ble.gatts_read(self._handle_config)
-        if packed_data != b'':
+        
+        if int.from_bytes(packed_data,"big") != 0:
             try:
                 config = struct.unpack('<f',packed_data)
-                print("read:",config[0])
+                if self.debug: print("read:",config[0])
                 return config[0]
             except:
-                print("Error: value in config is not a 4-byte float")
+                print("Error: value in config is not a 4-byte float") # TODO Change to error code
         else:
-            print("config is empty")
-            return 0
+            if self.debug: print("config is empty")
+            return float('nan')
     """
     Reads an array of floats from config characteristic
     returns a tuple of float values if succesful
@@ -129,24 +131,24 @@ class PhyphoxBLE:
         if packed_data != b'':
             try:
                 config = struct.unpack(f'{array_size}f',packed_data)
-                print("read:",config)
+                if self.debug: print("read:",config)
                 return config
             except:
-                print("Error: value in config is not a float or array size is wrong")
+                print("Error: value in config is not a float or array size is wrong") # TODO Change to error code
         else:
-            print("config is empty")
-            return (0,)
+            if self.debug: print("config is empty")
+            return (float('nan'),)
             
     def is_connected(self):
         return len(self._connections) > 0
 
     def _advertise(self, interval_us=500000):
         self._ble.gap_advertise(interval_us, adv_data=self._payload,resp_data=self._resp_data)
-        print("Started advertising")
+        if self.debug: print("Started advertising")
         
     def _stop_advertise(self):
         self._ble.gap_advertise(interval_us=None)
-        print("stopped advertising")
+        if self.debug: print("stopped advertising")
 
 
     def on_write(self, callback):
@@ -178,7 +180,7 @@ class PhyphoxBLE:
         
         
     def when_subscription_received(self):
-        print("subscription received")
+        if self.debug: print("Subscription received")
 
         self._stop_advertise()
         
@@ -215,8 +217,8 @@ class PhyphoxBLE:
     def addExperiment(self, exp):
         buf = StringIO()
         exp.getFirstBytes(buf, self._device_name)
-        for vi in range(phyphox.phyphoxBleNViews):
-            for el in range(phyphox.phyphoxBleNElements):
+        for vi in range(phyphox.phyphoxBLENViews):
+            for el in range(phyphox.phyphoxBLENElements):
                 exp.getViewBytes(buf,vi,el)
         exp.getLastBytes(buf)
         buf.seek(0)
@@ -227,7 +229,7 @@ class PhyphoxBLE:
         lastPos = self._p_exp.tell()
         self._exp_len = lastPos
         buf.close()
-        print("Experiment added")
+        if self.debug: print("Experiment added")
         
     def start(self, device_name="phyphox", exp_pointer=None, exp_len=None):
         self._device_name = device_name
@@ -238,15 +240,15 @@ class PhyphoxBLE:
                 print("Please enter length of the experiment")
             else:
                 self._exp_len = exp_len
-        print("starting server")
+        if self.debug: print("Starting server")
         self._p_exp.seek(0)
         self._p_exp.read()
         if self._p_exp.tell() == 0:
-            print("Create default experiment")
-            defaultExperiment = phyphox.PhyphoxBleExperiment()
-            firstView = phyphox.PhyphoxBleExperiment.View()
+            if self.debug: print("Create default experiment")
+            defaultExperiment = phyphox.PhyphoxBLEExperiment()
+            firstView = phyphox.PhyphoxBLEExperiment.View()
             firstView.setLabel("View")
-            firstGraph = phyphox.PhyphoxBleExperiment.Graph()
+            firstGraph = phyphox.PhyphoxBLEExperiment.Graph()
             firstGraph.setChannel(0,1)
             firstView.addElement(firstGraph)
             defaultExperiment.addView(firstView)
@@ -259,13 +261,12 @@ class PhyphoxBLE:
         self._write_callback = None
         
         if(len(self._device_name)>26):
-            self._payload = advertising_payload(name="phyphox", services=[phyphoxBleExperimentServiceUUID])
-        self._payload = advertising_payload(services=[phyphoxBleExperimentServiceUUID])
+            self._payload = advertising_payload(name="phyphox", services=[phyphoxBLEExperimentServiceUUID])
+        self._payload = advertising_payload(services=[phyphoxBLEExperimentServiceUUID])
 
         self._resp_data = advertising_payload(name=self._device_name)
         self._advertise()
         
-
 
 
 
