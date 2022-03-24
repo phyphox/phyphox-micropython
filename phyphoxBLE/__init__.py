@@ -1,2 +1,2 @@
-from .phyphoxBLE import *
-from .phyphoxBLEExperiment import *
+from .phyphoxBle import *
+from .phyphoxBleExperiment import *
