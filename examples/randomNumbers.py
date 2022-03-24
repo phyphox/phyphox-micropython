@@ -1,9 +1,9 @@
-import phyphox
+import phyphoxBLE
 import time
 import random
 
 def main():
-    p = phyphox.PhyphoxBLE()
+    p = phyphoxBLE.PhyphoxBLE()
     p.start()                                #Start the BLE server
         
     while True:
