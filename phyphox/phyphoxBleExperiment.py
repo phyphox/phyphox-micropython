@@ -1,17 +1,17 @@
 from io import StringIO
 
-phyphoxBLENViews      = 5
-phyphoxBLENElements   = 5
-phyphoxBLENExportSets = 5
+phyphoxBleNViews      = 5
+phyphoxBleNElements   = 5
+phyphoxBleNExportSets = 5
 
-class PhyphoxBLEExperiment:
+class PhyphoxBleExperiment:
     def __init__(self):
       self._TITLE          = "phyphox-Experiment"
       self._CATEGORY       = "phyphox mpy Experiments"
       self._DESCRIPTION    = "An experiment created with the phyphox BLE library for mpy-compatible micro controllers"
       self._CONFIG         = "000000"
-      self._VIEWS          = [0]*phyphoxBLENViews
-      self._EXPORTSETS     = [0]*phyphoxBLENExportSets
+      self._VIEWS          = [0]*phyphoxBleNViews
+      self._EXPORTSETS     = [0]*phyphoxBleNExportSets
     
     @property
     def TITLE(self):
@@ -101,8 +101,8 @@ class PhyphoxBLEExperiment:
       #views
       buffer.write('<views>\n')
       #errorhandling
-      for i in range(phyphoxBLENViews):
-        for j in range(phyphoxBLENElements):
+      for i in range(phyphoxBleNViews):
+        for j in range(phyphoxBleNElements):
           if self._VIEWS[i] and errors <= 2:
             if self._VIEWS[i]._ELEMENTS[j]:
               if not (self._VIEWS[i]._ELEMENTS[j]._ERROR._MESSAGE is ""):
@@ -118,7 +118,7 @@ class PhyphoxBLEExperiment:
         buffer.write('\t</view>\n')
       
     def getViewBytes(self, buffer, v, e):
-      if self._VIEWS[v] and v < phyphoxBLENViews:
+      if self._VIEWS[v] and v < phyphoxBleNViews:
         self._VIEWS[v].getBytes(buffer,e)
         
     def getLastBytes(self, buffer):
@@ -126,7 +126,7 @@ class PhyphoxBLEExperiment:
       buffer.write('</views>\n')      
       #build export
       buffer.write('<export>\n')
-      for i in range(phyphoxBLENExportSets):
+      for i in range(phyphoxBleNExportSets):
         if self._EXPORTSETS[i]:
           self._EXPORTSETS[i].getBytes(buffer)
           noExports = False
@@ -143,13 +143,13 @@ class PhyphoxBLEExperiment:
       #print(buffer.getvalue())
               
     def addView(self, v):
-      for i in range(phyphoxBLENViews):
+      for i in range(phyphoxBleNViews):
         if not self._VIEWS[i]:
           self._VIEWS[i] = v
           break
         
     def addExportSet(self, e):
-        for i in range(phyphoxBLENExportSets):
+        for i in range(phyphoxBleNExportSets):
             if not self._EXPORTSETS[i]:
                 self._EXPORTSETS[i] = e
                 break
@@ -158,7 +158,7 @@ class PhyphoxBLEExperiment:
       def __init__(self):
         self._LABEL         = ""
         self._XMLATTRIBUTE  = ""
-        self._ELEMENTS = [0]*phyphoxBLENElements
+        self._ELEMENTS = [0]*phyphoxBleNElements
         
       @property
       def LABEL(self):
@@ -171,7 +171,7 @@ class PhyphoxBLEExperiment:
         return self._ELEMENTS
     
       def addElement(self, e):
-        for i in range(phyphoxBLENElements):
+        for i in range(phyphoxBleNElements):
           if not self._ELEMENTS[i]:
             self._ELEMENTS[i] = e
             break
@@ -191,7 +191,7 @@ class PhyphoxBLEExperiment:
           buffer.write('>\n')
         if self._ELEMENTS[elem]:
             self._ELEMENTS[elem].getBytes(buffer)
-        if elem == phyphoxBLENElements-1:
+        if elem == phyphoxBleNElements-1:
           buffer.write('\t</view>\n')
     
     class Error:
@@ -213,7 +213,7 @@ class PhyphoxBLEExperiment:
         pass
     
       def err_check_length(self, strInput1, intInput, strInput2):
-        ret = PhyphoxBLEExperiment.Error()
+        ret = PhyphoxBleExperiment.Error()
         if len(strInput1) > intInput:
           ret._MESSAGE += "ERR_01, in "
           ret._MESSAGE += strInput2
@@ -221,7 +221,7 @@ class PhyphoxBLEExperiment:
         return ret
         
       def err_check_upper(self, intInput1, intInput2, strInput):
-        ret = PhyphoxBLEExperiment.Error()
+        ret = PhyphoxBleExperiment.Error()
         if intInput1 > intInput2:
           ret._MESSAGE += "ERR_02, in "
           ret._MESSAGE += strInput
@@ -229,7 +229,7 @@ class PhyphoxBLEExperiment:
         return ret
         
       def err_check_hex(self, strInput1, strInput2):
-        ret = PhyphoxBLEExperiment.Error()
+        ret = PhyphoxBleExperiment.Error()
         if len(strInput1) != 6:
           ret._MESSAGE += "ERR_03, in "
           ret._MESSAGE += strInput2
@@ -243,7 +243,7 @@ class PhyphoxBLEExperiment:
         return ret
         
       def err_check_style(self, strInput1, strInput2):
-        ret = PhyphoxBLEExperiment.Error()
+        ret = PhyphoxBleExperiment.Error()
         if not((strInput1 is "lines") or (strInput1 is "dots") or (strInput1 is "vbars") or (strInput1 is "hbars") or (strInput1 is "map")):
           ret._MESSAGE += "ERR_04, in "
           ret._MESSAGE += strInput2
@@ -256,7 +256,7 @@ class PhyphoxBLEExperiment:
         super().__init__()
         self._TYPEID        = 0
         self._LABEL         = ""
-        self._ERROR         = PhyphoxBLEExperiment.Error()
+        self._ERROR         = PhyphoxBleExperiment.Error()
       
       @property
       def TYPEID(self):
@@ -612,15 +612,15 @@ class PhyphoxBLEExperiment:
             super().__init__()
             self._LABEL         = ""
             self._XMLATTRIBUTE  = ""
-            self._ERROR         = PhyphoxBLEExperiment.Error()
-            self._ELEMENTS      = [0]*phyphoxBLENExportSets
+            self._ERROR         = PhyphoxBleExperiment.Error()
+            self._ELEMENTS      = [0]*phyphoxBleNExportSets
             
         def setLabel(self, strInput):
             self._ERROR = self.err_check_length(strInput,41,'setLabel') if self._ERROR._MESSAGE is "" else self._ERROR
             self._LABEL = " name=\"" + strInput + "\""
             
         def addElement(self, e):
-            for i in range(phyphoxBLENExportSets):
+            for i in range(phyphoxBleNExportSets):
                 if not self._ELEMENTS[i]:
                     self._ELEMENTS[i] = e
                     break
@@ -634,7 +634,8 @@ class PhyphoxBLEExperiment:
             buffer.write(self._LABEL)
             buffer.write(self._XMLATTRIBUTE)
             buffer.write('>\n')
-            for i in range(phyphoxBLENExportSets):
+            for i in range(phyphoxBleNExportSets):
                 if self._ELEMENTS[i]:
                     self._ELEMENTS[i].getBytes(buffer)
             buffer.write('\t</set>\n')
+
