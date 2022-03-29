@@ -1,31 +1,33 @@
-import phyphox
+import phyphoxBLE
 import machine
 import time
 
-p = phyphox.PhyphoxBLE()
-lastTimestamp = 0;
-blinkInterval = 1000;
-led = True;
+p = phyphoxBLE.PhyphoxBLE()
+lastTimestamp = 0
+blinkInterval = 1000
+led = True
+ledPin = 22
+p.debug = False
 
 def main():
     global lastTimestamp
     global led
     p.start("My Device")
     p._write_callback = receivedData
-    buildInLed = machine.Pin(2, machine.Pin.OUT)
+    buildInLed = machine.Pin(ledPin, machine.Pin.OUT)    
     
     #Experiment
-    getDataFromSmartphone = phyphox.PhyphoxBleExperiment()   #generate experiment on Arduino which plot random values
+    getDataFromSmartphone = phyphoxBLE.PhyphoxBLEExperiment()   #generate experiment on Arduino which plot random values
     getDataFromSmartphone.setTitle("Set Blink Interval")
     getDataFromSmartphone.setCategory("Micropython Experiments")
     getDataFromSmartphone.setDescription("User can set Blink Interval of Mikrocontroller LED")    
 
     #View
-    firstView = phyphox.PhyphoxBleExperiment.View()
+    firstView = phyphoxBLE.PhyphoxBLEExperiment.View()
     firstView.setLabel("FirstView") #Create a "view"
 
     #Edit
-    Interval = phyphox.PhyphoxBleExperiment.Edit() 
+    Interval = phyphoxBLE.PhyphoxBLEExperiment.Edit() 
     Interval.setLabel("Interval")
     Interval.setUnit("ms")
     Interval.setSigned(False)
@@ -40,22 +42,17 @@ def main():
         if time.ticks_ms()-lastTimestamp > blinkInterval:
             lastTimestamp = time.ticks_ms();
             led = not led;
-            if led:
-                buildInLed.value(1)
-                print("Interval: ", blinkInterval)
-                print("led on")
-            else:
-                buildInLed.value(0)
-                print("Interval: ", blinkInterval)
-                print("led off")
+            buildInLed.value(led)
 
 def receivedData():          # get data from PhyPhox app
     global blinkInterval
-    receivedInterval = float(p.read())
-    if receivedInterval > 0:
+    receivedInterval = p.read()
+    if receivedInterval > 0 and receivedInterval != blinkInterval:
+        print("New Interval: ", receivedInterval)
         blinkInterval = receivedInterval
 
 
 if __name__ == "__main__":
     main()
+
 
