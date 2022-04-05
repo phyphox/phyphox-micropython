@@ -1,6 +1,6 @@
 import bluetooth
 import struct
-import phyphoxBLE.phyphoxBLEExperiment
+import phyphoxBLE.experiment
 import io
 import time
 from io import StringIO
@@ -244,10 +244,10 @@ class PhyphoxBLE:
         self._p_exp.read()
         if self._p_exp.tell() == 0:
             if self.debug: print("Create default experiment")
-            defaultExperiment = phyphoxBLE.PhyphoxBLEExperiment()
-            firstView = phyphoxBLE.PhyphoxBLEExperiment.View()
+            defaultExperiment = phyphoxBLE.Experiment()
+            firstView = phyphoxBLE.Experiment.View()
             firstView.setLabel("View")
-            firstGraph = phyphoxBLE.PhyphoxBLEExperiment.Graph()
+            firstGraph = phyphoxBLE.Experiment.Graph()
             firstGraph.setChannel(0,1)
             firstView.addElement(firstGraph)
             defaultExperiment.addView(firstView)

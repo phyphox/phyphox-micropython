@@ -1,8 +1,8 @@
-import phyphoxBLE
+from phyphoxBLE import PhyphoxBLE, Experiment
 import time
 import random
 
-p = phyphoxBLE.PhyphoxBLE()
+p = PhyphoxBLE()
 editValue = 0.0
 firstCall = True
 
@@ -12,19 +12,19 @@ def main():
     p._write_callback = receivedData
     
     #Experiment
-    plotRandomValues = phyphoxBLE.PhyphoxBLEExperiment()   #generate experiment on Arduino which plot random values
+    plotRandomValues = Experiment()   #generate experiment on Arduino which plot random values
     plotRandomValues.setTitle("Random Number Plotter")
     plotRandomValues.setCategory("Micropython Experiments")
     plotRandomValues.setDescription("Random numbers are generated on Arduino and visualized with phyphox afterwards")
 
     #View
-    firstView = phyphoxBLE.PhyphoxBLEExperiment.View()
+    firstView = Experiment.View()
     firstView.setLabel("FirstView") #Create a "view"
-    secondView = phyphoxBLE.PhyphoxBLEExperiment.View()
+    secondView = Experiment.View()
     secondView.setLabel("SecondView") #Create a "view"
 
     #Graph
-    firstGraph = phyphoxBLE.PhyphoxBLEExperiment.Graph()   #Create graph which will plot random numbers over time
+    firstGraph = Experiment.Graph()   #Create graph which will plot random numbers over time
     firstGraph.setLabel("Random number over time")
     firstGraph.setUnitX("s")
     firstGraph.setUnitY("")
@@ -36,7 +36,7 @@ def main():
     firstGraph.setChannel(0, 1)
 
     #Second Graph
-    secondGraph = phyphoxBLE.PhyphoxBLEExperiment.Graph()   #Create graph which will plot random numbers over time
+    secondGraph = Experiment.Graph()   #Create graph which will plot random numbers over time
     secondGraph.setLabel("Random number squared over random number")
     secondGraph.setUnitX("")
     secondGraph.setUnitY("")
@@ -48,18 +48,18 @@ def main():
     secondGraph.setChannel(1, 2)
 
     #Info
-    myInfo = phyphoxBLE.PhyphoxBLEExperiment.InfoField()     #Creates an info-box.
+    myInfo = Experiment.InfoField()     #Creates an info-box.
     myInfo.setInfo("In this view you can set a value between 1 and 10. The squared random value will be multiplied by this value and can be seen here.")
     #myInfo.setColor("404040")                   #Sets font color. Uses a 6 digit hexadecimal value in "quotation marks".
     myInfo.setXMLAttribute("size=\"1.2\"")
 
     #Separator
-    mySeparator = phyphoxBLE.PhyphoxBLEExperiment.Separator()      #Creates a line to separate elements.
+    mySeparator = Experiment.Separator()      #Creates a line to separate elements.
     mySeparator.setHeight(0.3)                       #Sets height of the separator.
     mySeparator.setColor("404040")                   #Sets color of the separator. Uses a 6 digit hexadecimal value in "quotation marks".
 
     #Value
-    myValue = phyphoxBLE.PhyphoxBLEExperiment.Value()  #Creates a value-box.
+    myValue = Experiment.Value()  #Creates a value-box.
     myValue.setLabel("Number")                  #Sets the label
     myValue.setPrecision(2)                     #The amount of digits shown after the decimal point.
     myValue.setUnit("u")                        #The physical unit associated with the displayed value.
@@ -68,7 +68,7 @@ def main():
     myValue.setXMLAttribute("size=\"2\"")
 
     #Edit
-    myEdit = phyphoxBLE.PhyphoxBLEExperiment.Edit() 
+    myEdit = Experiment.Edit() 
     myEdit.setLabel("Editfield")
     myEdit.setUnit("u")
     myEdit.setSigned(False)
@@ -77,14 +77,14 @@ def main():
     myEdit.setXMLAttribute("max=\"10\"")
 
     #Export
-    mySet = phyphoxBLE.PhyphoxBLEExperiment.ExportSet()        #Provides exporting the data to excel etc.
+    mySet = Experiment.ExportSet()        #Provides exporting the data to excel etc.
     mySet.setLabel("mySet")
 
-    myData1 = phyphoxBLE.PhyphoxBLEExperiment.ExportData() 
+    myData1 = Experiment.ExportData() 
     myData1.setLabel("myData1")
     myData1.setDatachannel(1)
 
-    myData2 = phyphoxBLE.PhyphoxBLEExperiment.ExportData() 
+    myData2 = Experiment.ExportData() 
     myData2.setLabel("myData2")
     myData2.setDatachannel(2)
 
