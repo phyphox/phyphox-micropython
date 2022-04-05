@@ -60,7 +60,7 @@ class PhyphoxBLE:
         self._p_exp = BytesIO()
         self._exp_len = 0
         self._ble = None
-        self._connections = None
+        self._connections = ()
         self._write_callback = None
         self._payload = None
         self._resp_data = None
