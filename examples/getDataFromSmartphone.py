@@ -1,8 +1,8 @@
-import phyphoxBLE
+from phyphoxBLE import PhyphoxBLE, Experiment
 import machine
 import time
 
-p = phyphoxBLE.PhyphoxBLE()
+p = PhyphoxBLE()
 lastTimestamp = 0
 blinkInterval = 1000
 led = True
@@ -17,17 +17,17 @@ def main():
     buildInLed = machine.Pin(ledPin, machine.Pin.OUT)    
     
     #Experiment
-    getDataFromSmartphone = phyphoxBLE.PhyphoxBLEExperiment()   #generate experiment on Arduino which plot random values
+    getDataFromSmartphone = Experiment()   #generate experiment on Arduino which plot random values
     getDataFromSmartphone.setTitle("Set Blink Interval")
     getDataFromSmartphone.setCategory("Micropython Experiments")
     getDataFromSmartphone.setDescription("User can set Blink Interval of Mikrocontroller LED")    
 
     #View
-    firstView = phyphoxBLE.PhyphoxBLEExperiment.View()
+    firstView = Experiment.View()
     firstView.setLabel("FirstView") #Create a "view"
 
     #Edit
-    Interval = phyphoxBLE.PhyphoxBLEExperiment.Edit() 
+    Interval = Experiment.Edit() 
     Interval.setLabel("Interval")
     Interval.setUnit("ms")
     Interval.setSigned(False)
