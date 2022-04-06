@@ -120,12 +120,40 @@ If you can help with this, we are happy to receive a pull request. You can conta
 
 ## Credits
 
-This library has been developed by the phyphox team at the RWTH Aachen University. In particular, the foundations and basic concept was created by Alexander Krampe as part of his Master thesis. The library has been further improved and is now maintained by Dominik Dorsel, our PhD student who also supervised Alexander's thesis.
+This library has been developed by the phyphox team at the RWTH Aachen University. It is a port of our [Arduino BLE library](https://github.com/phyphox/phyphox-arduino) and hs been developed by Edward Leier and Marcel Hagedorn.
+
+## Contact
+
+Contact us any time at contact@phyphox.org and learn more about phyphox on https://phyphox.org.
 
 ## Licence
 
 This library is released under the GNU Lesser General Public Licence v3.0 (or newer).
 
-## Contact
+Note that it uses MicroPython and uses code from its Bluetooth examples (specifically [ble_advertising.py](https://github.com/micropython/micropython/blob/master/examples/bluetooth/ble_advertising.py), which are licenced under the MIT licence as listed at the end of this readme
 
-Contact us any time at contact@phyphox.org and learn more about phyphox on https://phyphox.org.
+## Third-party licences
+
+MicroPython is licenced under the MIT licence.
+
+The MIT License (MIT)
+
+Copyright (c) 2013-2022 Damien P. George
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
