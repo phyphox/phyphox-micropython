@@ -120,7 +120,7 @@ If you can help with this, we are happy to receive a pull request. You can conta
 
 ## Credits
 
-This library has been developed by the phyphox team at the RWTH Aachen University. It is a port of our [Arduino BLE library](https://github.com/phyphox/phyphox-arduino) and hs been developed by Edward Leier and Marcel Hagedorn.
+This library has been developed by the phyphox team at the RWTH Aachen University. It is a port of our [Arduino BLE library](https://github.com/phyphox/phyphox-arduino) and has been developed by Edward Leier and Marcel Hagedorn.
 
 ## Contact
 
