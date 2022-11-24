@@ -15,7 +15,7 @@ This library generates an experiment configuration in this file format and allow
 
 ## Installation
 
-[TBD]
+* Installiere Thonny IDE.
 
 ## Usage
 
