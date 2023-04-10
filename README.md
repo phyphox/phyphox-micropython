@@ -15,7 +15,7 @@ This library generates an experiment configuration in this file format and allow
 
 ## Installation
 
-1. Install the [Thonny Python IDE](www.thonny.org).
+1. Install the [Thonny Python IDE](https://www.thonny.org).
 2. Download the MicroPython-Firmware as `bin`-file for your ESP32 chip (e.g. https://micropython.org/download/esp32/).
 3. Connect your ESP32 microcontroller via USB to your computer.
 4. Open Thonny, go to the "Tools"-Menu and select "Options...".
