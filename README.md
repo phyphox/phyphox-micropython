@@ -15,6 +15,7 @@ This library generates an experiment configuration in this file format and allow
 
 ## Installation
 
+### Install MicroPython Firmware
 1. Install the [Thonny Python IDE](https://www.thonny.org).
 2. Download the MicroPython-Firmware as `bin`-file for your ESP32 chip (e.g. https://micropython.org/download/esp32/).
 3. Connect your ESP32 microcontroller via USB to your computer.
@@ -28,6 +29,19 @@ This library generates an experiment configuration in this file format and allow
 11. After the firmware is written on the ESP32 close the "Options..." window and test the installation with a shell prompt (e.g. `print('Hello World!')`).
 ![Installation of MicroPython on the ESP32 with Thonny IDE](output.gif)
 
+### Install Phyphox-BLE library
+1. Download the [Phyphox-BLE library](https://github.com/phyphox/phyphox-micropython/archive/refs/heads/main.zip) for MicroPython.
+2. Extract the zip-file.
+3. Connect your ESP32 via USB to your computer.
+4. Open Thonny.
+5. Select "Files" in the "View"-Menu of Thonny.
+6. Navigate to the directory with the extracted zip-file (`phyphox-micropython-main`).
+7. Left-click on the `phyphoxBLE` directory and select "Upload to /". The Phyphox-BLE is now uploading to the ESP32 chip.
+8. With the command `from phyphoxBLE import PhyphoxBLE, Experiment` you can now use the library.
+![Installation of the Phyphox-BLE library](BLEinstall.gif)
+
+### Test the Phyphox-BLE library
+1. Open an example script from the `phyphox-micropython-main` directory e.g. `RandomNumbers.py`.
 
 ## Usage
 
