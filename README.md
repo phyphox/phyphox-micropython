@@ -19,10 +19,14 @@ This library generates an experiment configuration in this file format and allow
 2. Download the MicroPython-Firmware as `bin`-file for your ESP32 chip (e.g. https://micropython.org/download/esp32/).
 3. Connect your ESP32 microcontroller via USB to your computer.
 4. Open Thonny, go to the "Tools"-Menu and select "Options...".
-5. Go to "Interpreter" and select "MicroPython (ESP32)" and the USB port connected to the ESP32 (e.g. "USB SERIAL "/tty/).
-[pinkpink]
-![Alt Text](output.gif)
-6. 
+5. Go to "Interpreter" and select "MicroPython (ESP32)".
+6. Select the USB port connected to the ESP32 (e.g. "USB Serial (/dev/ttyUSB0)").
+7. Click on "Install or update MicroPython".
+8. Select the USB-Port and the firmware file. 
+9. Choose "Erase flash before installing" to delete the flash before installing the Firmware. 
+10. Click on "Install". The Installation takes a few minutes.
+11. After the firmware is written on the ESP32 close the "Options..." window and test the installation with a shell prompt (e.g. `print('Hello World!')`).
+![Installation of MicroPython on the ESP32 with Thonny IDE](output.gif)
 
 
 ## Usage
