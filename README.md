@@ -21,7 +21,7 @@ This library generates an experiment configuration in this file format and allow
 4. Open Thonny, go to the "Tools"-Menu and select "Options...".
 5. Go to "Interpreter" and select "MicroPython (ESP32)" and the USB port connected to the ESP32 (e.g. "USB SERIAL "/tty/).
 [pinkpink]
-![Alt Text](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNzFmMDhiZTYxYWQ4MjhkN2Y3YmYwZWJlZGY3MmQ4MDRjMDE2YTFmMyZjdD1n/ETHvF93QSveOOQJqmV/giphy.gif)
+![Alt Text](https://media.giphy.com/media/34DVzkFIxIYww3OKVz/giphy.gif)
 6. 
 
 
