@@ -1,8 +1,8 @@
 from io import StringIO
 
-phyphoxBleNViews      = 5
-phyphoxBleNElements   = 5
-phyphoxBleNExportSets = 5
+phyphoxBleNViews      = 8
+phyphoxBleNElements   = 8
+phyphoxBleNExportSets = 8
 
 class Experiment:
     def __init__(self):
@@ -280,10 +280,16 @@ class Experiment:
         self._LABELX        = ""
         self._LABELY        = ""
         self._COLOR         = ""
+        self._COLOR2        = ""
+        self._COLOR3        = ""
+        self._COLOR4        = ""
         self._XPRECISION    = ""
         self._YPRECISION    = ""
         self._INPUTX        = "CH0"
         self._INPUTY        = "CH1"
+        self._INPUTY2       = ""
+        self._INPUTY3       = ""
+        self._INPUTY4       = ""
         self._STYLE         = ""
         self._XMLATTRIBUTE  = ""
        
@@ -302,6 +308,15 @@ class Experiment:
         
       def COLOR(self):
         return self._COLOR
+    
+      def COLOR2(self):
+        return self._COLOR2
+    
+      def COLOR3(self):
+        return self._COLOR3
+    
+      def COLOR4(self):
+        return self._COLOR4
         
       def XPRECISION(self):
         return self._XPRECISION
@@ -314,6 +329,15 @@ class Experiment:
         
       def INPUTY(self):
         return self._INPUTY
+      
+      def INPUTY2(self):
+        return self._INPUTY2
+    
+      def INPUTY3(self):
+        return self._INPUTY3
+    
+      def INPUTY4(self):
+        return self._INPUTY4
         
       def STYLE(self):
         return self._STYLE
@@ -339,9 +363,15 @@ class Experiment:
         self._ERROR = self.err_check_length(strInput,20,'setLabelY') if self._ERROR._MESSAGE is "" else self._ERROR
         self._LABELY = " labelY=\"" + strInput + "\""
         
-      def setColor(self, strInput):
+      def setColor(self, strInput, strInput2=None, strInput3=None, strInput4=None):
         self._ERROR = self.err_check_hex(strInput,'setColor') if self._ERROR._MESSAGE is "" else self._ERROR
         self._COLOR = " color=\"" + strInput + "\""
+        if strInput2 != None:
+            self._COLOR2 = " color=\"" + strInput2 + "\""
+        if strInput3 != None:
+            self._COLOR3 = " color=\"" + strInput3 + "\""
+        if strInput4 != None:
+            self._COLOR4 = " color=\"" + strInput4 + "\""
         
       def setXPrecision(self, intInput):
         self._ERROR = self.err_check_upper(intInput,9999,'setXPrecision') if self._ERROR._MESSAGE is "" else self._ERROR
@@ -351,11 +381,17 @@ class Experiment:
         self._ERROR = self.err_check_upper(intInput,9999,'setYPrecision') if self._ERROR._MESSAGE is "" else self._ERROR
         self._YPRECISION = " yPrecision=\"" + str(intInput) + "\""
         
-      def setChannel(self, intInputX, intInputY):
+      def setChannel(self, intInputX, intInputY, intInputY2=None, intInputY3=None, intInputY4=None):
         self._ERROR = self.err_check_upper(intInputX,5,'setChannel') if self._ERROR._MESSAGE is "" else self._ERROR
         self._ERROR = self.err_check_upper(intInputY,5,'setChannel') if self._ERROR._MESSAGE is "" else self._ERROR
         self._INPUTX = "CH" + str(intInputX)
         self._INPUTY = "CH" + str(intInputY)
+        if intInputY2 != None:
+            self._INPUTY2 = "CH" + str(intInputY2)
+        if intInputY3 != None:
+            self._INPUTY3 = "CH" + str(intInputY3)
+        if intInputY4 != None:
+            self._INPUTY4 = "CH" + str(intInputY4)
         
       def setStyle(self, strInput):
         self._ERROR = self.err_check_style(strInput,'setStyle') if self._ERROR._MESSAGE is "" else self._ERROR
@@ -376,13 +412,35 @@ class Experiment:
         buffer.write(self._XPRECISION)
         buffer.write(self._YPRECISION)
         buffer.write(self._STYLE)
-        buffer.write(self._COLOR)
         buffer.write(self._XMLATTRIBUTE)
         buffer.write('>\n')
-        buffer.write('\t\t\t<input axis=\"x\">')
+        buffer.write('\t\t\t<input axis=\"x\" ')
+        buffer.write(self._COLOR)
+        buffer.write('>')
         buffer.write(self._INPUTX)
         buffer.write('</input>\n\t\t\t<input axis=\"y\">')
         buffer.write(self._INPUTY)
+        if self._INPUTY2 != "":
+            buffer.write('</input>\n\t\t\t<input axis=\"x\" ')
+            buffer.write(self._COLOR2)
+            buffer.write('>')
+            buffer.write(self._INPUTX)
+            buffer.write('</input>\n\t\t\t<input axis=\"y\">')
+            buffer.write(self._INPUTY2)
+        if self._INPUTY3 != "":
+            buffer.write('</input>\n\t\t\t<input axis=\"x\" ')
+            buffer.write(self._COLOR3)
+            buffer.write('>')
+            buffer.write(self._INPUTX)
+            buffer.write('</input>\n\t\t\t<input axis=\"y\">')
+            buffer.write(self._INPUTY3)
+        if self._INPUTY4 != "":
+            buffer.write('</input>\n\t\t\t<input axis=\"x\" ')
+            buffer.write(self._COLOR3)
+            buffer.write('>')
+            buffer.write(self._INPUTX)
+            buffer.write('</input>\n\t\t\t<input axis=\"y\">')
+            buffer.write(self._INPUTY3)
         buffer.write('</input>\n\t\t</graph>\n')
 
     class Edit(Element):
@@ -638,5 +696,6 @@ class Experiment:
                 if self._ELEMENTS[i]:
                     self._ELEMENTS[i].getBytes(buffer)
             buffer.write('\t</set>\n')
+
 
 
