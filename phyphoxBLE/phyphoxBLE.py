@@ -1,8 +1,8 @@
 import bluetooth
 import struct
 import phyphoxBLE.experiment
-import io
 import time
+import _thread
 from io import StringIO
 from io import BytesIO
 from phyphoxBLE.ble_advertising import advertising_payload
@@ -89,7 +89,7 @@ class PhyphoxBLE:
                 control_data = self._ble.gatts_read(self._handle_experiment_control)
                 if self.debug: print(control_data)
                 if control_data == b'\x01':
-                    self.when_subscription_received()
+                    _thread.start_new_thread(self.when_subscription_received, (conn_handle,))
                     if self.debug: print("Sending experiment")
     
     """
@@ -178,7 +178,7 @@ class PhyphoxBLE:
         return c ^ 0xFFFFFFFF
         
         
-    def when_subscription_received(self):
+    def when_subscription_received(self, conn_handle):
         if self.debug: print("subscription received")
 
         self._stop_advertise()
@@ -193,23 +193,20 @@ class PhyphoxBLE:
         header = "phyphox".encode() + struct.pack('>I',arrayLength) + struct.pack('>I',checksum) + b'\x00' + b'\x00' + b'\x00' + b'\x00' + b'\x00'    
         time.sleep_ms(30)
 
-        for conn_handle in self._connections:
-            self._ble.gatts_notify(conn_handle, self._handle_experiment, header)
-            time.sleep_ms(30)
+        self._ble.gatts_notify(conn_handle, self._handle_experiment, header)
+        time.sleep_ms(30)
         
         for i in range(int(self._exp_len/20)):
             exp.seek(i*20)
             byteSlice = exp.read(20)
-            for conn_handle in self._connections:
-                self._ble.gatts_notify(conn_handle, self._handle_experiment, byteSlice)
-                time.sleep_ms(30)
+            self._ble.gatts_notify(conn_handle, self._handle_experiment, byteSlice)
+            time.sleep_ms(30)
         if(self._exp_len%20 != 0):
             rest = self._exp_len%20
             exp.seek(self._exp_len-rest)
             byteSlice = exp.read(rest)
-            for conn_handle in self._connections:
-                self._ble.gatts_notify(conn_handle, self._handle_experiment, byteSlice)
-                time.sleep_ms(10)
+            self._ble.gatts_notify(conn_handle, self._handle_experiment, byteSlice)
+            time.sleep_ms(10)
             self._subscribed = True
         self._advertise()
 
@@ -222,7 +219,7 @@ class PhyphoxBLE:
         exp.getLastBytes(buf)
         buf.seek(0)
         str_data = buf.read().encode('utf8')
-        self._p_exp = io.BytesIO(str_data)    
+        self._p_exp = BytesIO(str_data)    
         self._p_exp.seek(0)
         self._p_exp.read()
         lastPos = self._p_exp.tell()
@@ -266,8 +263,6 @@ class PhyphoxBLE:
         self._resp_data = advertising_payload(name=self._device_name)
         self._advertise()
         
-
-
 
 
 
